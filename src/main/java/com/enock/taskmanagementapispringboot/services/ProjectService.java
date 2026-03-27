@@ -3,6 +3,7 @@ package com.enock.taskmanagementapispringboot.services;
 import com.enock.taskmanagementapispringboot.dtos.ProjectRequest;
 import com.enock.taskmanagementapispringboot.dtos.ProjectResponse;
 import com.enock.taskmanagementapispringboot.entities.Project;
+import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.mappers.ProjectMapper;
 import com.enock.taskmanagementapispringboot.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
@@ -31,12 +32,12 @@ public class ProjectService {
     }
 
     public ProjectResponse getProjectById(Long id) {
-        Project project = projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project " + id + " Not Found"));
+        Project project = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project " + id + " Not Found"));
         return projectMapper.mapToProjectResponse(project);
     }
 
     public ProjectResponse updateProject(Long id, ProjectRequest project) {
-        Project existingProject = projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project " + id + " Not Found"));
+        Project existingProject = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project " + id + " Not Found"));
 
         existingProject.setProjectName(project.getProjectName());
         existingProject.setProjectDescription(project.getProjectDescription());
@@ -46,7 +47,7 @@ public class ProjectService {
     }
 
     public String deleteProject(Long id) {
-        Project existingProject = projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project " + id + " Not Found"));
+        Project existingProject = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project " + id + " Not Found"));
 
         projectRepository.deleteById(id);
         return "project " + id + ": " + existingProject.getProjectName() + " has been deleted";
