@@ -1,6 +1,9 @@
 package com.enock.taskmanagementapispringboot.services;
 
+import com.enock.taskmanagementapispringboot.dtos.ProjectRequest;
+import com.enock.taskmanagementapispringboot.dtos.ProjectResponse;
 import com.enock.taskmanagementapispringboot.entities.Project;
+import com.enock.taskmanagementapispringboot.mappers.ProjectMapper;
 import com.enock.taskmanagementapispringboot.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
 
@@ -9,29 +12,37 @@ import java.util.List;
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ProjectMapper projectMapper;
 
-    public ProjectService(ProjectRepository projectRepository){
+    public ProjectService(ProjectRepository projectRepository, ProjectMapper projectMapper){
         this.projectRepository = projectRepository;
+        this.projectMapper = projectMapper;
     }
 
-    public List<Project> getProjects() {
-        return projectRepository.findAll();
+    public List<ProjectResponse> getProjects() {
+        return projectMapper.mapToProjectResponseList(projectRepository.findAll());
     }
 
-    public Project createProject(Project project) {
-        return projectRepository.save(project);
+    public ProjectResponse createProject(ProjectRequest project) {
+        Project projectToSave = projectMapper.mapToProject(project);
+        Project savedProject = projectRepository.save(projectToSave);
+
+        return projectMapper.mapToProjectResponse(savedProject);
     }
 
-    public Project getProjectById(Long id) {
-        return projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project " + id + " Not Found"));
+    public ProjectResponse getProjectById(Long id) {
+        Project project = projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project " + id + " Not Found"));
+        return projectMapper.mapToProjectResponse(project);
     }
 
-    public Project updateProject(Long id, Project project) {
+    public ProjectResponse updateProject(Long id, ProjectRequest project) {
         Project existingProject = projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project " + id + " Not Found"));
 
         existingProject.setProjectName(project.getProjectName());
         existingProject.setProjectDescription(project.getProjectDescription());
-        return projectRepository.save(existingProject);
+        Project updatedProject = projectRepository.save(existingProject);
+
+        return projectMapper.mapToProjectResponse(updatedProject);
     }
 
     public String deleteProject(Long id) {

@@ -1,7 +1,9 @@
 package com.enock.taskmanagementapispringboot.controllers;
 
-import com.enock.taskmanagementapispringboot.entities.Project;
+import com.enock.taskmanagementapispringboot.dtos.ProjectRequest;
+import com.enock.taskmanagementapispringboot.dtos.ProjectResponse;
 import com.enock.taskmanagementapispringboot.services.ProjectService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,22 +18,22 @@ public class ProjectController {
     }
 
     @GetMapping
-    public List<Project> getProjects() {
+    public List<ProjectResponse> getProjects() {
         return projectService.getProjects();
     }
 
     @PostMapping
-    public Project createProject(@RequestBody Project project) {
+    public ProjectResponse createProject(@Valid @RequestBody ProjectRequest project) {
         return projectService.createProject(project);
     }
 
     @GetMapping("/{id}")
-    public Project getProjectById(@PathVariable Long id) {
+    public ProjectResponse getProjectById(@PathVariable Long id) {
         return projectService.getProjectById(id);
     }
 
     @PutMapping("/{id}")
-    public  Project updateProject(@PathVariable Long id, @RequestBody Project project) {
+    public  ProjectResponse updateProject(@PathVariable Long id, @Valid @RequestBody ProjectRequest project) {
         return projectService.updateProject(id, project);
     }
 
