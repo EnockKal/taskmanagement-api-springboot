@@ -1,16 +1,18 @@
 package com.enock.taskmanagementapispringboot.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Objects;
+import java.util.List;
 
 @Setter
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Project {
     @Id
@@ -19,29 +21,7 @@ public class Project {
     private String projectName;
     private String projectDescription;
 
-    public Project() {
-    }
-
-    public Project(Long projectId, String projectName, String projectDescription) {
-        this.projectId = projectId;
-        this.projectName = projectName;
-        this.projectDescription = projectDescription;
-    }
-
-    public Project(String projectName, String projectDescription) {
-        this.projectName = projectName;
-        this.projectDescription = projectDescription;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Project project = (Project) o;
-        return projectId == project.projectId && Objects.equals(projectName, project.projectName) && Objects.equals(projectDescription, project.projectDescription);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(projectId, projectName, projectDescription);
-    }
+    @OneToMany(mappedBy = "project")
+    @JsonIgnore
+    private List<Task> tasks;
 }
