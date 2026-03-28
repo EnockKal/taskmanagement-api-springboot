@@ -1,7 +1,8 @@
 package com.enock.taskmanagementapispringboot.services;
 
-import com.enock.taskmanagementapispringboot.dtos.TaskRequest;
-import com.enock.taskmanagementapispringboot.dtos.TaskResponse;
+import com.enock.taskmanagementapispringboot.dtos.taskDTO.TaskRequest;
+import com.enock.taskmanagementapispringboot.dtos.taskDTO.TaskResponse;
+import com.enock.taskmanagementapispringboot.dtos.taskDTO.TaskUpdateRequest;
 import com.enock.taskmanagementapispringboot.entities.Project;
 import com.enock.taskmanagementapispringboot.entities.Task;
 import com.enock.taskmanagementapispringboot.enums.TaskStatus;
@@ -51,23 +52,27 @@ public class TaskService {
         return taskMapper.mapToTaskList(taskRepository.findAll());
     }
 
-    public TaskResponse updateTask(Long id, TaskRequest taskRequest) {
+    public TaskResponse updateTask(Long id, TaskUpdateRequest taskUpdateRequest) {
         Task task = taskRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Task with id " + id + " not Found"));
 
-        task.setTitle(taskRequest.getTitle());
-        task.setTaskDescription(taskRequest.getTaskDescription());
-        if (taskRequest.getTaskStatus() != null) {
-            task.setTaskStatus(taskRequest.getTaskStatus());
+        if (taskUpdateRequest.getTitle() != null){
+            task.setTitle(taskUpdateRequest.getTitle());
+        }
+        if (taskUpdateRequest.getTaskDescription() != null){
+            task.setTaskDescription(taskUpdateRequest.getTaskDescription());
+        }
+        if (taskUpdateRequest.getTaskStatus() != null) {
+            task.setTaskStatus(taskUpdateRequest.getTaskStatus());
         }
 
-        if (taskRequest.getDueDate() != null) {
-            task.setDueDate(taskRequest.getDueDate());
+        if (taskUpdateRequest.getDueDate() != null) {
+            task.setDueDate(taskUpdateRequest.getDueDate());
         }
 
-        if (taskRequest.getProjectId() != null) {
-            Project project = projectRepository.findById(taskRequest.getProjectId()).orElseThrow(() ->
-                    new ResourceNotFoundException("Project with id " + taskRequest.getProjectId() + " not Found"));
+        if (taskUpdateRequest.getProjectId() != null) {
+            Project project = projectRepository.findById(taskUpdateRequest.getProjectId()).orElseThrow(() ->
+                    new ResourceNotFoundException("Project with id " + taskUpdateRequest.getProjectId() + " not Found"));
             task.setProject(project);
         }
 
@@ -78,7 +83,7 @@ public class TaskService {
 
     public String deleteTaskById(Long id) {
         Task task = taskRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Task with id " + id + " Not Found"));
+                new ResourceNotFoundException("Task with id " + id + " not Found"));
 
         taskRepository.deleteById(id);
 

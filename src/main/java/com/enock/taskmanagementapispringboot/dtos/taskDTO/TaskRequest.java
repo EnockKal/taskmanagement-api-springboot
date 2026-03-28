@@ -1,4 +1,4 @@
-package com.enock.taskmanagementapispringboot.dtos;
+package com.enock.taskmanagementapispringboot.dtos.taskDTO;
 
 import com.enock.taskmanagementapispringboot.enums.TaskStatus;
 import jakarta.validation.constraints.NotBlank;

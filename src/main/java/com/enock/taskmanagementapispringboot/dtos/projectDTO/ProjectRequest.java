@@ -1,4 +1,4 @@
-package com.enock.taskmanagementapispringboot.dtos;
+package com.enock.taskmanagementapispringboot.dtos.projectDTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

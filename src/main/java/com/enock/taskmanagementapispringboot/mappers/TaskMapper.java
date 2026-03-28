@@ -1,7 +1,7 @@
 package com.enock.taskmanagementapispringboot.mappers;
 
-import com.enock.taskmanagementapispringboot.dtos.TaskRequest;
-import com.enock.taskmanagementapispringboot.dtos.TaskResponse;
+import com.enock.taskmanagementapispringboot.dtos.taskDTO.TaskRequest;
+import com.enock.taskmanagementapispringboot.dtos.taskDTO.TaskResponse;
 import com.enock.taskmanagementapispringboot.entities.Task;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,7 @@
-package com.enock.taskmanagementapispringboot.dtos;
+package com.enock.taskmanagementapispringboot.dtos.taskDTO;
 
 import com.enock.taskmanagementapispringboot.enums.TaskStatus;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,12 +13,12 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskResponse {
-    private Long id;
+public class TaskUpdateRequest {
     private String title;
+
+    @Size(min = 5, max = 100, message = "description must be between 5 and 100 characters")
     private String taskDescription;
     private TaskStatus taskStatus;
     private LocalDate dueDate;
-
     private Long projectId;
 }

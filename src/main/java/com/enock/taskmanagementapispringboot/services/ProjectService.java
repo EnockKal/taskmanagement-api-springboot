@@ -1,7 +1,7 @@
 package com.enock.taskmanagementapispringboot.services;
 
-import com.enock.taskmanagementapispringboot.dtos.ProjectRequest;
-import com.enock.taskmanagementapispringboot.dtos.ProjectResponse;
+import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectRequest;
+import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectResponse;
 import com.enock.taskmanagementapispringboot.entities.Project;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.mappers.ProjectMapper;

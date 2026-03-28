@@ -2,6 +2,7 @@ package com.enock.taskmanagementapispringboot.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,5 +29,11 @@ public class GlobalExceptionHandler {
                 );
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> handleInvalidFormat(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest()
+                .body("Invalid date format. Please use YYYY-MM-DD (e.g., 2026-04-15)");
     }
 }

@@ -1,7 +1,7 @@
 package com.enock.taskmanagementapispringboot.controllers;
 
-import com.enock.taskmanagementapispringboot.dtos.ProjectRequest;
-import com.enock.taskmanagementapispringboot.dtos.ProjectResponse;
+import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectRequest;
+import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectResponse;
 import com.enock.taskmanagementapispringboot.services.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
