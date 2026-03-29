@@ -25,10 +25,11 @@ public class TaskController {
     public Page<TaskResponse> getAllTasks(@RequestParam(value = "page", defaultValue = "0") int page,
                                           @RequestParam(value = "size", defaultValue = "3") int size,
                                           @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
-                                          @RequestParam(value = "direction", defaultValue = "asc") Sort.Direction direction,
+                                          @RequestParam(value = "direction", defaultValue = "asc") String direction,
                                           @RequestParam(required = false, value = "taskStatus") TaskStatus taskStatus
     ) {
-        Sort sort = Sort.by(direction, sortBy);
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction.toUpperCase()); // Convert to uppercase
+        Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         return taskService.getAllTasks(pageable, taskStatus);
     }
