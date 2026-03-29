@@ -48,9 +48,14 @@ public class TaskService {
         return  taskMapper.mapToTaskResponse(task);
     }
 
-    public Page<TaskResponse> getAllTasks(Pageable pageable) {
-        Page<Task> page = taskRepository.findAll(pageable);
-        return page.map(taskMapper::mapToTaskResponse);
+    public Page<TaskResponse> getAllTasks(Pageable pageable, TaskStatus taskStatus) {
+        if (taskStatus != null) {
+            Page<Task> taskPage = taskRepository.findByTaskStatus(taskStatus, pageable);
+            return taskPage.map(taskMapper::mapToTaskResponse);
+        }else {
+            Page<Task> page = taskRepository.findAll(pageable);
+            return page.map(taskMapper::mapToTaskResponse);
+        }
     }
 
     public TaskResponse updateTask(Long id, TaskUpdateRequest taskUpdateRequest) {
