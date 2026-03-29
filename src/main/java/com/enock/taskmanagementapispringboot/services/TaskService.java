@@ -10,6 +10,8 @@ import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundExceptio
 import com.enock.taskmanagementapispringboot.mappers.TaskMapper;
 import com.enock.taskmanagementapispringboot.repository.ProjectRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,8 +50,9 @@ public class TaskService {
         return  taskMapper.mapToTaskResponse(task);
     }
 
-    public List<TaskResponse> getAllTasks() {
-        return taskMapper.mapToTaskList(taskRepository.findAll());
+    public Page<TaskResponse> getAllTasks(Pageable pageable) {
+        Page<Task> page = taskRepository.findAll(pageable);
+        return page.map(taskMapper::mapToTaskResponse);
     }
 
     public TaskResponse updateTask(Long id, TaskUpdateRequest taskUpdateRequest) {

@@ -5,6 +5,9 @@ import com.enock.taskmanagementapispringboot.dtos.taskDTO.TaskResponse;
 import com.enock.taskmanagementapispringboot.dtos.taskDTO.TaskUpdateRequest;
 import com.enock.taskmanagementapispringboot.services.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +22,11 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponse> getAllTasks() {
-        return taskService.getAllTasks();
+    public Page<TaskResponse> getAllTasks(@RequestParam(value = "page", defaultValue = "0") int page,
+                                          @RequestParam(value = "size", defaultValue = "3") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return taskService.getAllTasks(pageable);
     }
 
     @PostMapping
