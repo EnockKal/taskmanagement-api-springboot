@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +24,12 @@ public class TaskController {
 
     @GetMapping
     public Page<TaskResponse> getAllTasks(@RequestParam(value = "page", defaultValue = "0") int page,
-                                          @RequestParam(value = "size", defaultValue = "3") int size
+                                          @RequestParam(value = "size", defaultValue = "3") int size,
+                                          @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+                                          @RequestParam(value = "direction", defaultValue = "asc") Sort.Direction direction
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
         return taskService.getAllTasks(pageable);
     }
 
