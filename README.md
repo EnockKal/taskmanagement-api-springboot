@@ -92,15 +92,22 @@ The application follows a layered architecture:
 ### Pagination
 ```http
 GET /api/tasks?page=0&size=5
+```
 
 ### Sorting
+```http
 GET /api/tasks?page=0&size=5&sortBy=dueDate&direction=asc
+```
 
 ### Filtering by Status
+```http
 GET /api/tasks?taskStatus=IN_PROGRESS&page=0&size=5
+```
 
 ### Combined
+```http
 GET /api/tasks?taskStatus=PENDING&page=0&size=5&sortBy=title&direction=desc
+```
 
 ---
 
