@@ -26,12 +26,13 @@ public class TaskController {
                                           @RequestParam(value = "size", defaultValue = "3") int size,
                                           @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
                                           @RequestParam(value = "direction", defaultValue = "asc") String direction,
-                                          @RequestParam(required = false, value = "taskStatus") TaskStatus taskStatus
+                                          @RequestParam(required = false, value = "taskStatus") TaskStatus taskStatus,
+                                          @RequestParam(required = false, name = "projectId") Long projectId
     ) {
         Sort.Direction sortDirection = Sort.Direction.fromString(direction.toUpperCase()); // Convert to uppercase
         Sort sort = Sort.by(sortDirection, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
-        return taskService.getAllTasks(pageable, taskStatus);
+        return taskService.getAllTasks(projectId, pageable, taskStatus);
     }
 
     @PostMapping

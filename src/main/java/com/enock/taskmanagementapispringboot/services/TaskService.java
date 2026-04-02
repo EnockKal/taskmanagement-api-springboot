@@ -48,13 +48,21 @@ public class TaskService {
         return  taskMapper.mapToTaskResponse(task);
     }
 
-    public Page<TaskResponse> getAllTasks(Pageable pageable, TaskStatus taskStatus) {
+    public Page<TaskResponse> getAllTasks(Long projectId, Pageable pageable, TaskStatus taskStatus) {
+        if (projectId != null && taskStatus != null) {
+            Page<Task> tasks = taskRepository.findByTaskStatusAndProject_ProjectId(taskStatus, projectId, pageable);
+            return tasks.map(taskMapper::mapToTaskResponse);
+        }
         if (taskStatus != null) {
-            Page<Task> taskPage = taskRepository.findByTaskStatus(taskStatus, pageable);
-            return taskPage.map(taskMapper::mapToTaskResponse);
-        }else {
-            Page<Task> page = taskRepository.findAll(pageable);
-            return page.map(taskMapper::mapToTaskResponse);
+            Page<Task> tasksByStatus = taskRepository.findByTaskStatus(taskStatus, pageable);
+            return tasksByStatus.map(taskMapper::mapToTaskResponse);
+        }
+        if (projectId != null) {
+            Page<Task> tasksByProjectId = taskRepository.findByProject_ProjectId(projectId, pageable);
+            return tasksByProjectId.map((taskMapper::mapToTaskResponse));
+        }else  {
+            Page<Task> tasks = taskRepository.findAll(pageable);
+            return tasks.map(taskMapper::mapToTaskResponse);
         }
     }
 
