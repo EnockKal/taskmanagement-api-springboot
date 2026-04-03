@@ -48,11 +48,24 @@ public class TaskService {
         return  taskMapper.mapToTaskResponse(task);
     }
 
-    public Page<TaskResponse> getAllTasks(Long projectId, Pageable pageable, TaskStatus taskStatus) {
+    public Page<TaskResponse> getAllTasks(Long projectId, Pageable pageable, TaskStatus taskStatus, String title) {
+        if (projectId != null && taskStatus != null && title != null && !title.isBlank()) {
+            Page<Task> tasks = taskRepository.findByTaskStatusAndProject_ProjectIdAndTitleContainingIgnoreCase(taskStatus, projectId, title, pageable);
+            return tasks.map(taskMapper::mapToTaskResponse);
+        }
         if (projectId != null && taskStatus != null) {
             Page<Task> tasks = taskRepository.findByTaskStatusAndProject_ProjectId(taskStatus, projectId, pageable);
             return tasks.map(taskMapper::mapToTaskResponse);
         }
+        if (taskStatus != null && title != null && !title.isBlank()){
+            Page<Task> tasks = taskRepository.findByTaskStatusAndTitleContainingIgnoreCase(taskStatus, title, pageable);
+            return tasks.map(taskMapper::mapToTaskResponse);
+        }
+        if (projectId != null && title != null && !title.isBlank()){
+            Page<Task> tasks = taskRepository.findByProject_ProjectIdAndTitleContainingIgnoreCase(projectId, title, pageable);
+            return tasks.map(taskMapper::mapToTaskResponse);
+        }
+
         if (taskStatus != null) {
             Page<Task> tasksByStatus = taskRepository.findByTaskStatus(taskStatus, pageable);
             return tasksByStatus.map(taskMapper::mapToTaskResponse);
@@ -60,7 +73,12 @@ public class TaskService {
         if (projectId != null) {
             Page<Task> tasksByProjectId = taskRepository.findByProject_ProjectId(projectId, pageable);
             return tasksByProjectId.map((taskMapper::mapToTaskResponse));
-        }else  {
+        }
+        if (title != null && !title.isBlank()) {
+            Page<Task> tasksByTitle = taskRepository.findByTitleContainingIgnoreCase(title, pageable);
+            return tasksByTitle.map((taskMapper::mapToTaskResponse));
+        }
+        else {
             Page<Task> tasks = taskRepository.findAll(pageable);
             return tasks.map(taskMapper::mapToTaskResponse);
         }

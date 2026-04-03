@@ -12,4 +12,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Page<Task> findByProject_ProjectId(long projectId, Pageable pageable);
 
     Page<Task> findByTaskStatusAndProject_ProjectId(TaskStatus taskStatus, Long projectId, Pageable pageable);
+
+    Page<Task> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    Page<Task> findByTaskStatusAndTitleContainingIgnoreCase(TaskStatus taskStatus, String title, Pageable pageable);
+
+    Page<Task> findByProject_ProjectIdAndTitleContainingIgnoreCase(Long projectId, String title, Pageable pageable);
+
+    Page<Task> findByTaskStatusAndProject_ProjectIdAndTitleContainingIgnoreCase(TaskStatus taskStatus, long projectId, String title, Pageable pageable);
+
 }
