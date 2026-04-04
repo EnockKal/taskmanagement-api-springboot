@@ -10,9 +10,14 @@ import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundExceptio
 import com.enock.taskmanagementapispringboot.mappers.TaskMapper;
 import com.enock.taskmanagementapispringboot.repository.ProjectRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskRepository;
+import com.enock.taskmanagementapispringboot.specification.TaskSpecifications;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.PredicateSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class TaskService {
@@ -49,39 +54,24 @@ public class TaskService {
     }
 
     public Page<TaskResponse> getAllTasks(Long projectId, Pageable pageable, TaskStatus taskStatus, String title) {
-        if (projectId != null && taskStatus != null && title != null && !title.isBlank()) {
-            Page<Task> tasks = taskRepository.findByTaskStatusAndProject_ProjectIdAndTitleContainingIgnoreCase(taskStatus, projectId, title, pageable);
-            return tasks.map(taskMapper::mapToTaskResponse);
-        }
-        if (projectId != null && taskStatus != null) {
-            Page<Task> tasks = taskRepository.findByTaskStatusAndProject_ProjectId(taskStatus, projectId, pageable);
-            return tasks.map(taskMapper::mapToTaskResponse);
-        }
-        if (taskStatus != null && title != null && !title.isBlank()){
-            Page<Task> tasks = taskRepository.findByTaskStatusAndTitleContainingIgnoreCase(taskStatus, title, pageable);
-            return tasks.map(taskMapper::mapToTaskResponse);
-        }
-        if (projectId != null && title != null && !title.isBlank()){
-            Page<Task> tasks = taskRepository.findByProject_ProjectIdAndTitleContainingIgnoreCase(projectId, title, pageable);
-            return tasks.map(taskMapper::mapToTaskResponse);
-        }
+        Specification<Task> spec = null;
 
-        if (taskStatus != null) {
-            Page<Task> tasksByStatus = taskRepository.findByTaskStatus(taskStatus, pageable);
-            return tasksByStatus.map(taskMapper::mapToTaskResponse);
-        }
         if (projectId != null) {
-            Page<Task> tasksByProjectId = taskRepository.findByProject_ProjectId(projectId, pageable);
-            return tasksByProjectId.map((taskMapper::mapToTaskResponse));
+            Specification<Task> condition = TaskSpecifications.hasProjectId(projectId);
+            spec = spec == null ? condition : spec.and(condition);
+        }
+        if (taskStatus != null) {
+            Specification<Task> condition = TaskSpecifications.hasStatus(taskStatus);
+            spec = spec == null ? condition : spec.and(condition);
         }
         if (title != null && !title.isBlank()) {
-            Page<Task> tasksByTitle = taskRepository.findByTitleContainingIgnoreCase(title, pageable);
-            return tasksByTitle.map((taskMapper::mapToTaskResponse));
+            Specification<Task> condition = TaskSpecifications.hasTitle(title);
+            spec = spec == null ? condition : spec.and(condition);
         }
-        else {
-            Page<Task> tasks = taskRepository.findAll(pageable);
-            return tasks.map(taskMapper::mapToTaskResponse);
-        }
+
+        Page<Task> tasks = taskRepository.findAll(spec, pageable);
+
+        return tasks.map(taskMapper::mapToTaskResponse);
     }
 
     public TaskResponse updateTask(Long id, TaskUpdateRequest taskUpdateRequest) {
