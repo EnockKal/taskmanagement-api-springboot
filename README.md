@@ -125,7 +125,7 @@ GET /api/tasks?taskStatus=COMPLETED&projectId=1&title=result
 ### Implementation details
 This feature was first implemented using derived query methods, then refactored to use JpaSpecificationExecutor and a dedicated TaskSpecifications class for cleaner and more scalable dynamic filtering.
 
-This refactor improved the codebase by:
+This refactors improved the codebase by:
 
 - removing repository method explosion
 - supporting flexible optional filter combinations
