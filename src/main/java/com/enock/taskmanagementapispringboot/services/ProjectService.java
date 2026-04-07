@@ -2,6 +2,7 @@ package com.enock.taskmanagementapispringboot.services;
 
 import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectRequest;
 import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectResponse;
+import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectUpdateRequest;
 import com.enock.taskmanagementapispringboot.entities.Project;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.mappers.ProjectMapper;
@@ -36,11 +37,16 @@ public class ProjectService {
         return projectMapper.mapToProjectResponse(project);
     }
 
-    public ProjectResponse updateProject(Long id, ProjectRequest project) {
+    public ProjectResponse updateProject(Long id, ProjectUpdateRequest project) {
         Project existingProject = projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project " + id + " Not Found"));
 
-        existingProject.setProjectName(project.getProjectName());
-        existingProject.setProjectDescription(project.getProjectDescription());
+        if (project.getProjectName() != null) {
+            existingProject.setProjectName(project.getProjectName());
+        }
+        if (project.getProjectDescription() != null) {
+            existingProject.setProjectDescription(project.getProjectDescription());
+        }
+
         Project updatedProject = projectRepository.save(existingProject);
 
         return projectMapper.mapToProjectResponse(updatedProject);

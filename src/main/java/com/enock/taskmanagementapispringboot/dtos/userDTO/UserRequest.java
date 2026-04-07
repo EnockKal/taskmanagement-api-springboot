@@ -3,6 +3,7 @@ package com.enock.taskmanagementapispringboot.dtos.userDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.Setter;
 @Setter
 public class UserRequest {
     @NotBlank
+    @Size(min = 15, max = 20, message = "Username must be between 15 and 20 characters")
     private String username;
 
     @NotBlank

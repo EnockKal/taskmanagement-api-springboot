@@ -36,4 +36,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest()
                 .body("Invalid date format. Please use YYYY-MM-DD (e.g., 2026-04-15)");
     }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleUserAlreadyExistsException(UserAlreadyExistsException ex){
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
 }

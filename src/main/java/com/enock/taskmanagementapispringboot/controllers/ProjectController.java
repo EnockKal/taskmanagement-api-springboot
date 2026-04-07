@@ -2,6 +2,7 @@ package com.enock.taskmanagementapispringboot.controllers;
 
 import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectRequest;
 import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectResponse;
+import com.enock.taskmanagementapispringboot.dtos.projectDTO.ProjectUpdateRequest;
 import com.enock.taskmanagementapispringboot.services.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,7 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public  ProjectResponse updateProject(@PathVariable Long id, @Valid @RequestBody ProjectRequest project) {
+    public  ProjectResponse updateProject(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest project) {
         return projectService.updateProject(id, project);
     }
 
