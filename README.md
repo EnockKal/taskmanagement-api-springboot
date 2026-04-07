@@ -41,35 +41,30 @@ This project demonstrates backend engineering best practices, including DTO-base
 - Assign tasks to projects
 - Task status management (PENDING, IN_PROGRESS, COMPLETED, CANCELLED)
 
+### User Management
+- Create, update, delete, and retrieve tasks
+- Assign tasks to users
+- Prevent deletion of users with assigned tasks OR automatic unassignment before deletion
+
 ### API Capabilities
 - DTO-based request/response design
 - Global exception handling
 - Input validation
 - Partial updates (PATCH-style logic)
-- Pagination
-- Sorting
+- Pagination and Sorting
 - Filtering by task status
 
 ---
 
 ## Architecture
 The application follows a layered architecture:
+- Clean architecture (DTO + mapper)
+- Validation
+- Global Exception handling
+- Relationships (User ↔ Task, Project ↔ Task)
 - Controller → handles HTTP requests
 - Service → contains business logic
 - Repository → interacts with database
-- DTO → controls API input/output
-- Mapper → converts between Entity and DTO
-
----
-
-## Key Concepts Implemented
-- One-to-Many relationship (Project → Tasks)
-- DTO pattern for clean API design
-- Global exception handling
-- Partial updates (update only provided fields)
-- Pagination with PageRequest
-- Sorting with Sort
-- Filtering using query parameters
 
 ---
 
@@ -144,19 +139,16 @@ Task retrieval also supports pagination and sorting through request parameters s
 GET /api/tasks?page=0&size=5&sortBy=id&direction=asc&taskStatus=IN_PROGRESS&title=report
 ```
 
-## Roadmap / Upcoming Enhancements
+## Upcoming Enhancements
 
 This project is actively being extended to simulate a more production-ready system. Planned improvements include:
-
-- User entity and task assignment (User → Tasks relationship)
 - Filtering tasks by assigned user
 - Authentication and authorization (JWT-based security)
 - Role-based access control (Admin/User roles)
-- Improved validation and error handling
 - API documentation with Swagger/OpenAPI enhancements
 - Unit and integration testing
 - Cloud integration with AWS (S3 for file storage, RDS for PostgreSQL hosting)
-- Deployment to AWS (EC2/ECS) with Dockerized application
+- Deployment to AWS (Docker + EC2/ECS) with Dockerized application
 - Environment configuration and secrets management for production readiness
 
 The goal is to continuously evolve this project into a more complete, real-world backend system.
