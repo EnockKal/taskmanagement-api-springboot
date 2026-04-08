@@ -71,7 +71,7 @@ public class UserService {
         return userMapper.mapToUserResponse(savedUser);
     }
 
-    public String deleteUserById(Long id) {
+    public String deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("User with id: " + id + " not found"));
 
