@@ -24,6 +24,11 @@ public class S3Controller {
         return ResponseEntity.ok(map);
     }
 
+    @GetMapping("/presigned-url")
+    public ResponseEntity<String> presignedUrl(@RequestParam String fileName) {
+        return ResponseEntity.ok(s3Service.presignedUrl(fileName));
+    }
+
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteFile(@RequestParam String fileName) {
         String response = s3Service.deleteFile(fileName);

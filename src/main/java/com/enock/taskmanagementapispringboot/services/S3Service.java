@@ -9,8 +9,11 @@ import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +29,31 @@ public class S3Service {
         this.s3Client = s3Client;
     }
 
+    public String presignedUrl(String fileName) {
+        try (S3Presigner preSigner = S3Presigner.create()) {
+            s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .build()
+            );
+            GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(10))
+                    .getObjectRequest(b -> b.bucket(bucketName).key(fileName))
+                    .build();
+
+            return preSigner.presignGetObject(preSignRequest).url().toString();
+        }
+        catch (S3Exception e) {
+            if (e.statusCode() == 404) {
+                throw new ResourceNotFoundException("File not found: " + fileName);
+            }
+            else {
+                throw e;
+            }
+        }
+
+    }
+
     public FileResponse uploadFile(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File cannot be empty");
@@ -37,14 +65,17 @@ public class S3Service {
         }
         String generatedFileName = UUID.randomUUID().toString() + "-" + originalFilename;
 
-        s3Client.putObject(PutObjectRequest.builder()
+        s3Client.putObject(PutObjectRequest
+                        .builder()
                         .bucket(bucketName)
                         .key(generatedFileName)
                         .build(),
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize())
         );
 
-        GetUrlRequest urlRequest = GetUrlRequest.builder().bucket(bucketName)
+        GetUrlRequest urlRequest = GetUrlRequest
+                .builder()
+                .bucket(bucketName)
                 .key(generatedFileName)
                 .build();
 
@@ -59,9 +90,11 @@ public class S3Service {
             s3Client.headObject(HeadObjectRequest
                     .builder()
                     .bucket(bucketName)
-                    .key(fileName).build()
+                    .key(fileName)
+                    .build()
             );
-            s3Client.deleteObject(DeleteObjectRequest.builder()
+            s3Client.deleteObject(DeleteObjectRequest
+                    .builder()
                     .bucket(bucketName)
                     .key(fileName)
                     .build()
