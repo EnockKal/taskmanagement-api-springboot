@@ -1,6 +1,5 @@
-package com.enock.taskmanagementapispringboot.entities;
+package com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,19 +11,11 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-public class TaskAttachment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class TaskAttachmentResponse {
     private Long Id;
     private String originalFileName;
     private Long fileSize;
     private String objectKey;
     private String contentType;
     private LocalDateTime uploadedAt;
-
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_id")
-    private Task task;
 }
