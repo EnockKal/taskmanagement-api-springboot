@@ -68,7 +68,7 @@ public class ProjectController {
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "404", description = "Project not found")
     })
-    public  ProjectResponse updateProject(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest project) {
+    public ProjectResponse updateProject(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest project) {
         return projectService.updateProject(id, project);
     }
 
@@ -80,7 +80,7 @@ public class ProjectController {
             @ApiResponse(responseCode = "200", description = "Project deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Project not found")
     })
-    public  String deleteProject(@PathVariable Long id) {
+    public String deleteProject(@PathVariable Long id) {
         return projectService.deleteProject(id);
     }
 }
