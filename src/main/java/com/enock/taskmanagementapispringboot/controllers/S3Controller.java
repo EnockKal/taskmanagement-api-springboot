@@ -1,6 +1,6 @@
 package com.enock.taskmanagementapispringboot.controllers;
 
-import com.enock.taskmanagementapispringboot.dtos.S3DTO.FileResponse;
+import com.enock.taskmanagementapispringboot.dtos.S3DTO.S3FileResponse;
 import com.enock.taskmanagementapispringboot.services.S3Service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +18,8 @@ public class S3Controller {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<FileResponse> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        FileResponse map = s3Service.uploadFile(file);
+    public ResponseEntity<S3FileResponse> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+        S3FileResponse map = s3Service.uploadFile(file);
 
         return ResponseEntity.ok(map);
     }

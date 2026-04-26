@@ -9,8 +9,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FileResponse {
-    String fileName;
-    String fileSize;
-    String url;
+public class S3FileResponse {
+    private String objectKey;
+    private String originalFilename;
+    private Long fileSize;
+    private String contentType;
 }
