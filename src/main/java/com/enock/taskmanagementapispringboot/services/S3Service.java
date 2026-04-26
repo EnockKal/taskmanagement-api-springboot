@@ -22,36 +22,14 @@ import java.util.UUID;
 public class S3Service {
     private final S3Client s3Client;
 
+    private final S3Presigner s3Presigner;
+
     @Value("${aws.bucket.name}")
     private String bucketName;
 
-    public S3Service(S3Client s3Client) {
+    public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Client = s3Client;
-    }
-
-    public String presignedUrl(String fileName) {
-        try (S3Presigner preSigner = S3Presigner.create()) {
-            s3Client.headObject(HeadObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(fileName)
-                    .build()
-            );
-            GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(10))
-                    .getObjectRequest(b -> b.bucket(bucketName).key(fileName))
-                    .build();
-
-            return preSigner.presignGetObject(preSignRequest).url().toString();
-        }
-        catch (S3Exception e) {
-            if (e.statusCode() == 404) {
-                throw new ResourceNotFoundException("File not found: " + fileName);
-            }
-            else {
-                throw e;
-            }
-        }
-
+        this.s3Presigner = s3Presigner;
     }
 
     public FileResponse uploadFile(MultipartFile file) throws IOException {
@@ -112,12 +90,28 @@ public class S3Service {
         return "Deleted successfully";
     }
 
-//    public  byte[] downloadFile(String key) {
-//        ResponseBytes<GetObjectResponse> objectAsByte = s3Client.getObjectAsBytes(GetObjectRequest.builder()
-//                .bucket(bucketName)
-//                .key(key)
-//                .build()
-//        );
-//        return objectAsByte.asByteArray();
-//    }
+    public String presignedUrl(String fileName) { // downloading file temporary (for 10 min)
+        try {
+            s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .build()
+            );
+            GetObjectPresignRequest preSignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(10))
+                    .getObjectRequest(b -> b.bucket(bucketName).key(fileName))
+                    .build();
+
+            return s3Presigner.presignGetObject(preSignRequest).url().toString();
+        }
+        catch (S3Exception e) {
+            if (e.statusCode() == 404) {
+                throw new ResourceNotFoundException("File not found: " + fileName);
+            }
+            else {
+                throw e;
+            }
+        }
+
+    }
 }
