@@ -29,10 +29,10 @@ public class TaskAttachmentController {
         return ResponseEntity.ok(taskAttachmentService.findByTaskId(taskId));
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<S3FileResponse> uploadFile(@PathVariable Long taskId, @RequestParam("file") MultipartFile file) throws IOException {
-        S3FileResponse map = s3Service.uploadFile(file);
+    @PostMapping
+    public ResponseEntity<TaskAttachmentResponse> uploadFile(@PathVariable Long taskId, @RequestParam("file") MultipartFile file) throws IOException {
+        TaskAttachmentResponse taskAttachmentResponse = taskAttachmentService.uploadFile(taskId, file);
 
-        return ResponseEntity.ok(map);
+        return ResponseEntity.ok(taskAttachmentResponse);
     }
 }
