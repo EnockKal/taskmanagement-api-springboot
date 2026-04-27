@@ -60,6 +60,41 @@ public class TaskAttachmentService {
         TaskAttachment savedTaskAttachment = taskAttachmentRepository.save(taskAttachment);
 
         return taskAttachmentMapper.mapTaskAttachmentToTaskAttachmentResponse(savedTaskAttachment);
+    }
 
+    public String downloadFile(Long taskId, Long attachmentId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() ->
+                new ResourceNotFoundException("Task with id: " + taskId + " Not Found"));
+
+        TaskAttachment taskAttachment = taskAttachmentRepository.findById(attachmentId).orElseThrow(() ->
+                new ResourceNotFoundException("Attachment with id: " + attachmentId + " Not Found"));
+
+        if (!taskAttachment.getTask().getId().equals(task.getId())) {
+            throw new ResourceNotFoundException("Attachment with id: " + attachmentId + " Not Found in task with id: " + taskId);
+        }
+
+        String file = taskAttachment.getObjectKey();
+
+        return s3Service.presignedUrl(file);
+    }
+
+    public String deleteFile(Long taskId, Long attachmentId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(() ->
+                new ResourceNotFoundException("Task with id: " + taskId + " Not Found"));
+
+        TaskAttachment taskAttachment = taskAttachmentRepository.findById(attachmentId).orElseThrow(() ->
+                new ResourceNotFoundException("Attachment with id: " + attachmentId + " Not Found"));
+
+        if (!taskAttachment.getTask().getId().equals(task.getId())) {
+            throw new ResourceNotFoundException("Attachment with id: " + attachmentId + " Not Found in task with id: " + taskId);
+        }
+
+        String file = taskAttachment.getObjectKey();
+
+        String response = s3Service.deleteFile(file);
+
+        taskAttachmentRepository.delete(taskAttachment);
+
+        return  response;
     }
 }

@@ -17,11 +17,9 @@ import java.util.List;
 @Tag(name = "Task Attachments")
 public class TaskAttachmentController {
     private final TaskAttachmentService taskAttachmentService;
-    private final S3Service s3Service;
 
-    public TaskAttachmentController(TaskAttachmentService taskAttachmentService, S3Service s3Service) {
+    public TaskAttachmentController(TaskAttachmentService taskAttachmentService) {
         this.taskAttachmentService = taskAttachmentService;
-        this.s3Service = s3Service;
     }
 
     @GetMapping
@@ -34,5 +32,15 @@ public class TaskAttachmentController {
         TaskAttachmentResponse taskAttachmentResponse = taskAttachmentService.uploadFile(taskId, file);
 
         return ResponseEntity.ok(taskAttachmentResponse);
+    }
+
+    @GetMapping("/{attachmentId}/url")
+    public ResponseEntity<String> downloadFile(@PathVariable Long taskId, @PathVariable Long attachmentId) {
+        return ResponseEntity.ok(taskAttachmentService.downloadFile(taskId, attachmentId));
+    }
+
+    @DeleteMapping("/{attachmentId}")
+    public ResponseEntity<String> deleteFile(@PathVariable Long taskId, @PathVariable Long attachmentId) {
+        return ResponseEntity.ok(taskAttachmentService.deleteFile(taskId, attachmentId));
     }
 }
