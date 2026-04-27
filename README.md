@@ -13,9 +13,14 @@ Project highlights
 ```
 
 ## Overview
-A production-style RESTful API for managing projects and tasks, built with Spring Boot and PostgreSQL. This application supports full CRUD operations, validation, exception handling, pagination, sorting, and filtering.
+A production-style RESTful API for managing projects, tasks, users, and file attachments.
 
-This project demonstrates backend engineering best practices, including DTO-based architecture, layered design, and scalable API patterns.
+This project demonstrates backend engineering best practices including:
+- Layered architecture (Controller → Service → Repository)
+- DTO-based design
+- Validation and global exception handling
+- Scalable query patterns
+- Cloud integration with AWS S3
 
 ---
 
@@ -24,9 +29,11 @@ This project demonstrates backend engineering best practices, including DTO-base
 - Spring Boot
 - Spring Data JPA
 - PostgreSQL
+- AWS S3 (file storage with pre-signed URL access)
 - Maven
 - Lombok
 - Jakarta Validation
+- Swagger / OpenAPI (springdoc)
 
 ---
 
@@ -42,9 +49,20 @@ This project demonstrates backend engineering best practices, including DTO-base
 - Task status management (PENDING, IN_PROGRESS, COMPLETED, CANCELLED)
 
 ### User Management
-- Create, update, delete, and retrieve tasks
+- Create, update, delete, and retrieve users
+- Retrieve users by username or email
+- Prevent duplicate email registration
+- Update user email with conflict validation
 - Assign tasks to users
-- Prevent deletion of users with assigned tasks OR automatic unassignment before deletion
+- Safe deletion:
+   - Prevent deletion if tasks are assigned
+   - OR automatically unassign tasks before deletion
+
+### Task Attachments (AWS S3 Integration)
+- Upload files and attach them to tasks
+- Store file metadata in PostgreSQL and files in a private S3 bucket
+- Generate pre-signed URLs for secure, temporary access
+- Delete attachments from both S3 and the database
 
 ### API Capabilities
 - DTO-based request/response design
@@ -57,22 +75,26 @@ This project demonstrates backend engineering best practices, including DTO-base
 ---
 
 ## Architecture
-The application follows a layered architecture:
-- Clean architecture (DTO + mapper)
-- Validation
-- Global Exception handling
-- Relationships (User ↔ Task, Project ↔ Task)
+This application follows a layered architecture:
 - Controller → handles HTTP requests
 - Service → contains business logic
-- Repository → interacts with database
+- Repository → interacts with the database
+- DTO + Mapper → ensures clean data transfer
+- Global Exception Handler → centralized error handling
+
+### Relationships:
+- Project ↔ Tasks (One-to-Many)
+- User ↔ Tasks (One-to-Many)
+- Task ↔ Attachments (One-to-Many)
 
 ---
 
 ## Running the Application
 1. Configure PostgreSQL in application.properties
-2. (Optional) Change port:
+2. Configure AWS credentials (for S3)
+3. (Optional) Change port:
    server.port=8081
-3. Run:
+4. Run:
    mvn spring-boot:run
 
 
@@ -91,6 +113,21 @@ The application follows a layered architecture:
 - `GET /api/tasks/{id}`
 - `PUT /api/tasks/{id}`
 - `DELETE /api/tasks/{id}`
+
+### Users
+- `POST /api/users`
+- `GET /api/users`
+- `GET /api/users/{id}`
+- `PUT /api/users/{id}`
+- `DELETE /api/users/{id}`
+- `GET /api/users/username/{username}`
+- `GET /api/users/email/{email}`
+
+### Task Attachments
+- `POST /api/tasks/{taskId}/attachments`
+- `GET /api/tasks/{taskId}/attachments`
+- `GET /api/tasks/{taskId}/attachments/{attachmentId}/url`
+- `DELETE /api/tasks/{taskId}/attachments/{attachmentId}`
 
 ---
 
@@ -117,14 +154,6 @@ GET /api/tasks?projectId=1&title=result
 GET /api/tasks?taskStatus=COMPLETED&projectId=1
 GET /api/tasks?taskStatus=COMPLETED&projectId=1&title=result
 ```
-### Implementation details
-This feature was first implemented using derived query methods, then refactored to use JpaSpecificationExecutor and a dedicated TaskSpecifications class for cleaner and more scalable dynamic filtering.
-
-This refactors improved the codebase by:
-
-- removing repository method explosion
-- supporting flexible optional filter combinations
-- keeping the repository layer clean and maintainable
 
 ### Pagination and sorting
 
@@ -145,13 +174,13 @@ This project is actively being extended to simulate a more production-ready syst
 - Filtering tasks by assigned user
 - Authentication and authorization (JWT-based security)
 - Role-based access control (Admin/User roles)
-- API documentation with Swagger/OpenAPI enhancements
 - Unit and integration testing
-- Cloud integration with AWS (S3 for file storage, RDS for PostgreSQL hosting)
 - Deployment to AWS (Docker + EC2/ECS) with Dockerized application
 - Environment configuration and secrets management for production readiness
 
-The goal is to continuously evolve this project into a more complete, real-world backend system.
+## Notes
+
+This project is actively being improved to reflect real-world backend systems, scalable API design, and cloud-native best practices.
 
 ---
 
