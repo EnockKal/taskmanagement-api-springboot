@@ -22,7 +22,11 @@ public class TaskAttachmentService {
     private final TaskAttachmentMapper taskAttachmentMapper;
     private final S3Service s3Service;
 
-    public TaskAttachmentService(TaskAttachmentRepository taskAttachmentRepository, TaskRepository taskRepository, TaskAttachmentMapper taskAttachmentMapper, S3Service s3Service, S3Mapper s3Mapper, S3Service s3Service1) {
+    public TaskAttachmentService(TaskAttachmentRepository taskAttachmentRepository,
+                                 TaskRepository taskRepository,
+                                 TaskAttachmentMapper taskAttachmentMapper,
+                                 S3Service s3Service1
+    ) {
         this.taskAttachmentRepository = taskAttachmentRepository;
         this.taskRepository = taskRepository;
         this.taskAttachmentMapper = taskAttachmentMapper;
@@ -42,13 +46,14 @@ public class TaskAttachmentService {
         Task task = taskRepository.findById(taskId).orElseThrow(() ->
                 new ResourceNotFoundException("Task with id: " + taskId + " Not Found"));
 
-        S3FileResponse service = s3Service.uploadFile(file);
+        S3FileResponse s3FileResponse = s3Service.uploadFile(file);
 
         TaskAttachment taskAttachment = new TaskAttachment();
 
-        taskAttachment.setOriginalFileName(file.getOriginalFilename());
-        taskAttachment.setObjectKey(file.getOriginalFilename());
-        taskAttachment.setFileSize(file.getSize());
+        taskAttachment.setOriginalFileName(s3FileResponse.getOriginalFilename());
+        taskAttachment.setObjectKey(s3FileResponse.getObjectKey());
+        taskAttachment.setFileSize(s3FileResponse.getFileSize());
+        taskAttachment.setContentType(s3FileResponse.getContentType());
         taskAttachment.setUploadedAt(LocalDateTime.now());
         taskAttachment.setTask(task);
 

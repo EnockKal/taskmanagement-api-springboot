@@ -40,15 +40,21 @@ public class S3Service {
         }
         String objectKey = UUID.randomUUID().toString() + "-" + originalFilename;
 
+        String contentType = file.getContentType();
+        if (contentType == null || contentType.isBlank()) {
+            contentType = "application/octet-stream";
+        }
+
         s3Client.putObject(PutObjectRequest
                         .builder()
                         .bucket(bucketName)
                         .key(objectKey)
+                        .contentType(contentType)
                         .build(),
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize())
         );
 
-        String contentType = file.getContentType();
+
         Long fileSize = file.getSize();
 
         return new S3FileResponse(objectKey, originalFilename, fileSize, contentType);
