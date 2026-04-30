@@ -7,7 +7,6 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
-import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 public class CloudWatchLogsConfig {
@@ -20,24 +19,13 @@ public class CloudWatchLogsConfig {
     @Value("${cloud.aws.region.static}")
     private String region;
 
-    @Value("${aws.cloudwatch.log-group-name}")
-    private String groupName;
-
-    @Value("${aws.cloudwatch.log-stream-name}")
-    private String streamName;
-
     @Bean
-    public S3Client s3Client() {
+    public CloudWatchLogsClient cloudWatchLogsClient() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
-        return S3Client.builder()
+        return CloudWatchLogsClient.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .build();
-    }
-
-    @Bean
-    public CloudWatchLogsClient cloudWatchLogsClient() {
-
     }
 }

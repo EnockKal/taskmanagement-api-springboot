@@ -24,9 +24,12 @@ public class S3Service {
     @Value("${aws.bucket.name}")
     private String bucketName;
 
-    public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
+    private final CloudWatchService cloudWatchService;
+
+    public S3Service(S3Client s3Client, S3Presigner s3Presigner, CloudWatchService cloudWatchService) {
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
+        this.cloudWatchService = cloudWatchService;
     }
 
     public S3FileResponse uploadFile(MultipartFile file) throws IOException {
@@ -39,6 +42,7 @@ public class S3Service {
             originalFilename = "file";
         }
         String objectKey = UUID.randomUUID().toString() + "-" + originalFilename;
+        Long fileSize = file.getSize();
 
         String contentType = file.getContentType();
         if (contentType == null || contentType.isBlank()) {
@@ -54,8 +58,7 @@ public class S3Service {
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize())
         );
 
-
-        Long fileSize = file.getSize();
+        cloudWatchService.sendLogToCloudWatch("File uploaded successfully: " + objectKey);
 
         return new S3FileResponse(objectKey, originalFilename, fileSize, contentType);
     }
