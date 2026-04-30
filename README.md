@@ -29,7 +29,7 @@ This project demonstrates backend engineering best practices including:
 - Spring Boot
 - Spring Data JPA
 - PostgreSQL
-- AWS S3 (file storage with pre-signed URL access)
+- AWS S3 (S3, CloudWatch)
 - Maven
 - Lombok
 - Jakarta Validation
