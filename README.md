@@ -2,7 +2,7 @@
 > 🚧 Actively evolving project — new features and improvements are continuously being added.
 
 ```md
-Project highlights
+## Project highlights/Key Features
 
 - Built a Task Management REST API using Spring Boot, Spring Data JPA, and PostgreSQL
 - Implemented CRUD operations for Projects and Tasks
@@ -10,7 +10,8 @@ Project highlights
 - Implemented pagination and sorting for task retrieval
 - Added dynamic task filtering by status, project, and title using Spring Data JPA Specifications
 - Refactored from derived query methods to `JpaSpecificationExecutor` for scalable filtering logic
-- Integrated AWS CloudWatch Logs for application-level logging of S3 upload, download, and delete operations
+- Integrated AWS CloudWatch Logs for centralized logging of S3 operations (upload, delete, presigned URL generation)
+- Implemented structured logging for success and failure scenarios to improve observability and debugging
 - Configured IAM permissions for least-privilege access to S3 and CloudWatch Logs
 ```
 
@@ -94,7 +95,7 @@ This application follows a layered architecture:
 
 ## Running the Application
 1. Configure PostgreSQL in application.properties
-2. Configure AWS credentials for S3 and CloudWatch
+2. Configure AWS credentials (via environment variables or AWS CLI)
 3. Configure AWS S3 bucket name and CloudWatch log group/stream
 4. (Optional) Change port:
    `server.port=8081`
@@ -115,8 +116,8 @@ The OpenAPI JSON documentation is available at:
 http://localhost:8081/v3/api-docs
 ```
 Swagger UI can be used to explore available endpoints, view request/response models, and manually test API operations directly from the browser.
-
 For more complete API workflow testing, especially file uploads and repeated request scenarios, Postman is also used.
+This allows developers and recruiters to quickly understand and interact with the API without needing external tools.
 
 
 ## API Endpoints
@@ -151,6 +152,13 @@ For more complete API workflow testing, especially file uploads and repeated req
 - `DELETE /api/tasks/{taskId}/attachments/{attachmentId}`
 
 ---
+
+## Cloud Architecture
+
+- Files are stored in a private AWS S3 bucket
+- File metadata is stored in PostgreSQL
+- Pre-signed URLs are generated for secure, temporary file access
+- Application logs are sent to AWS CloudWatch for monitoring and debugging
 
 ## Task Filtering, Search, Pagination, and Sorting
 
