@@ -10,6 +10,8 @@ Project highlights
 - Implemented pagination and sorting for task retrieval
 - Added dynamic task filtering by status, project, and title using Spring Data JPA Specifications
 - Refactored from derived query methods to `JpaSpecificationExecutor` for scalable filtering logic
+- Integrated AWS CloudWatch Logs for application-level logging of S3 upload, download, and delete operations
+- Configured IAM permissions for least-privilege access to S3 and CloudWatch Logs
 ```
 
 ## Overview
@@ -20,7 +22,7 @@ This project demonstrates backend engineering best practices including:
 - DTO-based design
 - Validation and global exception handling
 - Scalable query patterns
-- Cloud integration with AWS S3
+- Cloud integration with AWS S3 and CloudWatch
 
 ---
 
@@ -63,6 +65,7 @@ This project demonstrates backend engineering best practices including:
 - Store file metadata in PostgreSQL and files in a private S3 bucket
 - Generate pre-signed URLs for secure, temporary access
 - Delete attachments from both S3 and the database
+- Log S3 upload, download URL generation, and delete events to AWS CloudWatch
 
 ### API Capabilities
 - DTO-based request/response design
@@ -91,11 +94,29 @@ This application follows a layered architecture:
 
 ## Running the Application
 1. Configure PostgreSQL in application.properties
-2. Configure AWS credentials (for S3)
-3. (Optional) Change port:
-   server.port=8081
-4. Run:
-   mvn spring-boot:run
+2. Configure AWS credentials for S3 and CloudWatch
+3. Configure AWS S3 bucket name and CloudWatch log group/stream
+4. (Optional) Change port:
+   `server.port=8081`
+5. Run:
+   `mvn spring-boot:run`
+
+## Swagger / OpenAPI Documentation
+
+This project includes Swagger/OpenAPI documentation using springdoc-openapi.
+
+After starting the application, Swagger UI is available at:
+
+```
+http://localhost:8081/swagger-ui.html
+```
+The OpenAPI JSON documentation is available at:
+```
+http://localhost:8081/v3/api-docs
+```
+Swagger UI can be used to explore available endpoints, view request/response models, and manually test API operations directly from the browser.
+
+For more complete API workflow testing, especially file uploads and repeated request scenarios, Postman is also used.
 
 
 ## API Endpoints
@@ -171,7 +192,6 @@ GET /api/tasks?page=0&size=5&sortBy=id&direction=asc&taskStatus=IN_PROGRESS&titl
 ## Upcoming Enhancements
 
 This project is actively being extended to simulate a more production-ready system. Planned improvements include:
-- Filtering tasks by assigned user
 - Authentication and authorization (JWT-based security)
 - Role-based access control (Admin/User roles)
 - Unit and integration testing
