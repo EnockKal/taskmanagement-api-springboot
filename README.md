@@ -105,7 +105,6 @@ This application follows a layered architecture:
 ## Swagger / OpenAPI Documentation
 
 This project includes Swagger/OpenAPI documentation using springdoc-openapi.
-
 After starting the application, Swagger UI is available at:
 
 ```
