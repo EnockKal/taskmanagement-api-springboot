@@ -8,8 +8,11 @@ import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundExceptio
 import com.enock.taskmanagementapispringboot.mappers.TaskAttachmentMapper;
 import com.enock.taskmanagementapispringboot.repository.TaskAttachmentRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -21,6 +24,7 @@ public class TaskAttachmentService {
     private final TaskRepository taskRepository;
     private final TaskAttachmentMapper taskAttachmentMapper;
     private final S3Service s3Service;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskAttachmentService.class);
 
     public TaskAttachmentService(TaskAttachmentRepository taskAttachmentRepository,
                                  TaskRepository taskRepository,
@@ -43,23 +47,59 @@ public class TaskAttachmentService {
     }
 
     public TaskAttachmentResponse uploadFile(Long taskId, MultipartFile file) throws IOException {
-        Task task = taskRepository.findById(taskId).orElseThrow(() ->
-                new ResourceNotFoundException("Task with id: " + taskId + " Not Found"));
+        try {
+            Task task = taskRepository.findById(taskId).orElseThrow(() ->
+                    new ResourceNotFoundException("Task with id: " + taskId + " Not Found"));
 
-        S3FileResponse s3FileResponse = s3Service.uploadFile(file);
+            LOGGER.info("event={} taskId={} fileName={} fileSize={} contentType={} status={}",
+                    "s3_upload_started",
+                    taskId,
+                    file.getOriginalFilename(),
+                    file.getSize(),
+                    file.getContentType(),
+                    "started");
 
-        TaskAttachment taskAttachment = new TaskAttachment();
+            S3FileResponse s3FileResponse = s3Service.uploadFile(file);
 
-        taskAttachment.setOriginalFileName(s3FileResponse.getOriginalFilename());
-        taskAttachment.setObjectKey(s3FileResponse.getObjectKey());
-        taskAttachment.setFileSize(s3FileResponse.getFileSize());
-        taskAttachment.setContentType(s3FileResponse.getContentType());
-        taskAttachment.setUploadedAt(LocalDateTime.now());
-        taskAttachment.setTask(task);
+            TaskAttachment taskAttachment = new TaskAttachment();
 
-        TaskAttachment savedTaskAttachment = taskAttachmentRepository.save(taskAttachment);
+            taskAttachment.setOriginalFileName(s3FileResponse.getOriginalFilename());
+            taskAttachment.setObjectKey(s3FileResponse.getObjectKey());
+            taskAttachment.setFileSize(s3FileResponse.getFileSize());
+            taskAttachment.setContentType(s3FileResponse.getContentType());
+            taskAttachment.setUploadedAt(LocalDateTime.now());
+            taskAttachment.setTask(task);
 
-        return taskAttachmentMapper.mapTaskAttachmentToTaskAttachmentResponse(savedTaskAttachment);
+            TaskAttachment savedTaskAttachment = taskAttachmentRepository.save(taskAttachment);
+
+            LOGGER.info("event={} taskId={} attachmentId{} fileName={} fileSize={} contentType={} status={} objectKey={}",
+                    "s3_upload_success",
+                    taskId,
+                    savedTaskAttachment.getId(),
+                    file.getOriginalFilename(),
+                    file.getSize(),
+                    file.getContentType(),
+                    "success",
+                    s3FileResponse.getObjectKey());
+
+            return taskAttachmentMapper.mapTaskAttachmentToTaskAttachmentResponse(savedTaskAttachment);
+
+        } catch (S3Exception e) {
+            LOGGER.error("event={} taskId={} fileName={} fileSize={} contentType={} status={} errorMessage={}",
+                    "s3_upload_failed",
+                    taskId,
+                    file.getOriginalFilename(),
+                    file.getSize(),
+                    file.getContentType(),
+                    "failed",
+                    e.getMessage());
+            if (e.statusCode() == 404) {
+                throw new ResourceNotFoundException("File not found: " + file.getOriginalFilename());
+            }
+            else {
+                throw e;
+            }
+        }
     }
 
     public String downloadFile(Long taskId, Long attachmentId) {
@@ -73,9 +113,30 @@ public class TaskAttachmentService {
             throw new ResourceNotFoundException("Attachment with id: " + attachmentId + " Not Found in task with id: " + taskId);
         }
 
-        String file = taskAttachment.getObjectKey();
+        try {
+            String file = taskAttachment.getObjectKey();
 
-        return s3Service.presignedUrl(file);
+            String presignedUrl = s3Service.presignedUrl(file);
+
+            LOGGER.info("event={} taskId={} attachmentId={} objectKey={} status={}",
+                    "s3_presigned_url_generated",
+                    taskId,
+                    attachmentId,
+                    taskAttachment.getObjectKey(),
+                    "success");
+
+            return presignedUrl;
+        }
+        catch (S3Exception e){
+            LOGGER.error("event={} taskId={} attachmentId={} objectKey={} status={} errorMessage={}",
+                    "s3_presigned_url_failed",
+                    taskId,
+                    attachmentId,
+                    taskAttachment.getObjectKey(), // can use "file" (cleaner) instead of "taskAttachment.getObjectKey()".
+                    "failed",
+                    e.getMessage());
+            throw e;
+        }
     }
 
     public String deleteFile(Long taskId, Long attachmentId) {
@@ -89,12 +150,31 @@ public class TaskAttachmentService {
             throw new ResourceNotFoundException("Attachment with id: " + attachmentId + " Not Found in task with id: " + taskId);
         }
 
-        String file = taskAttachment.getObjectKey();
+        try {
+            String file = taskAttachment.getObjectKey();
 
-        String response = s3Service.deleteFile(file);
+            String response = s3Service.deleteFile(file);
 
-        taskAttachmentRepository.delete(taskAttachment);
+            taskAttachmentRepository.delete(taskAttachment);
 
-        return  response;
+            LOGGER.info("event={} taskId={} attachmentId={} objectKey={} status={}",
+                    "s3_deletion_success",
+                    taskId,
+                    attachmentId,
+                    taskAttachment.getObjectKey(),
+                    "success");
+
+            return  response;
+        }
+        catch (S3Exception e){
+            LOGGER.error("event={} taskId={} attachmentId={} objectKey={} status={} errorMessage={}",
+                    "s3_deletion_failed",
+                    taskId,
+                    attachmentId,
+                    taskAttachment.getObjectKey(),
+                    "failed",
+                    e.getMessage());
+            throw e;
+        }
     }
 }
