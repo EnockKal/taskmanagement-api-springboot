@@ -24,12 +24,12 @@ public class S3Service {
     @Value("${aws.bucket.name}")
     private String bucketName;
 
-    private final CloudWatchService cloudWatchService;
+    //private final CloudWatchService cloudWatchService;
 
     public S3Service(S3Client s3Client, S3Presigner s3Presigner, CloudWatchService cloudWatchService) {
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
-        this.cloudWatchService = cloudWatchService;
+        //this.cloudWatchService = cloudWatchService;
     }
 
     public S3FileResponse uploadFile(MultipartFile file) throws IOException {
@@ -59,9 +59,9 @@ public class S3Service {
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize())
             );
 
-            cloudWatchService.sendLogToCloudWatch("File uploaded successfully: " + objectKey);
+            //cloudWatchService.sendLogToCloudWatch("File uploaded successfully: " + objectKey);
         } catch (S3Exception e) {
-            cloudWatchService.sendLogToCloudWatch("File upload failed: " + originalFilename + ", error= " + e.getMessage());
+            //cloudWatchService.sendLogToCloudWatch("File upload failed: " + originalFilename + ", error= " + e.getMessage());
             if (e.statusCode() == 404) {
                 throw new ResourceNotFoundException("File not found: " + originalFilename);
             }
@@ -88,9 +88,9 @@ public class S3Service {
                     .build()
             );
 
-            cloudWatchService.sendLogToCloudWatch("File deleted successfully: " + fileName);
+            //cloudWatchService.sendLogToCloudWatch("File deleted successfully: " + fileName);
         } catch (S3Exception e) {
-            cloudWatchService.sendLogToCloudWatch("File delete failed: " + fileName + ", error= " + e.getMessage());
+            //cloudWatchService.sendLogToCloudWatch("File delete failed: " + fileName + ", error= " + e.getMessage());
             if (e.statusCode() == 404) {
                 throw new ResourceNotFoundException("File not found: " + fileName);
             }
@@ -114,12 +114,12 @@ public class S3Service {
                     .getObjectRequest(b -> b.bucket(bucketName).key(fileName))
                     .build();
 
-            cloudWatchService.sendLogToCloudWatch("Presigned URL generated successfully: " + fileName);
+            //cloudWatchService.sendLogToCloudWatch("Presigned URL generated successfully: " + fileName);
 
             return s3Presigner.presignGetObject(preSignRequest).url().toString();
         }
         catch (S3Exception e) {
-            cloudWatchService.sendLogToCloudWatch("Error generating presigning URL: " + fileName + ", error= " + e.getMessage());
+            //cloudWatchService.sendLogToCloudWatch("Error generating presigning URL: " + fileName + ", error= " + e.getMessage());
             if (e.statusCode() == 404) {
                 throw new ResourceNotFoundException("File not found: " + fileName);
             }
