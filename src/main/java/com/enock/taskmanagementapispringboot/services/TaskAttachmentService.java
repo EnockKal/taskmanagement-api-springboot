@@ -76,7 +76,7 @@ public class TaskAttachmentService {
         try {
             s3FileResponse = s3Service.uploadFile(file);
 
-        } catch (S3Exception e) {
+        } catch (Exception e) {
             LOGGER.error("event={} taskId={} fileName={} fileSize={} contentType={} status={} errorMessage={}",
                     "s3_upload_failed",
                     taskId,
@@ -96,13 +96,7 @@ public class TaskAttachmentService {
                             "failed",
                             e.getMessage())
             );
-            if (e.statusCode() == 404) {
-                throw new ResourceNotFoundException("File not found: " + file.getOriginalFilename());
-            }
-            else {
-                throw e;
-            }
-
+            throw e;
         }
 
         TaskAttachment taskAttachment = new TaskAttachment();
