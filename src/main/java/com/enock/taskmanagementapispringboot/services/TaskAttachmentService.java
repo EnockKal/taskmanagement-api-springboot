@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.cloudwatchlogs.model.StandardUnit;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
@@ -130,6 +131,10 @@ public class TaskAttachmentService {
                         file.getContentType(),
                         "success",
                         s3FileResponse.getObjectKey())
+        );
+
+        cloudWatchService.sendMetricToCloudWatch(
+                "S3UploadedBytes", (double) file.getSize(), StandardUnit.BYTES
         );
 
         return taskAttachmentMapper.mapTaskAttachmentToTaskAttachmentResponse(savedTaskAttachment);
