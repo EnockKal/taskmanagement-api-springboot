@@ -105,6 +105,10 @@
             <artifactId>cloudwatch</artifactId>
             <version>2.25.0</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+        </dependency>
 
     </dependencies>
 
