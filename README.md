@@ -5,14 +5,14 @@
 ## Project highlights/Key Features
 
 - Built a Task Management REST API using Spring Boot, Spring Data JPA, and PostgreSQL
-- Implemented CRUD operations for Projects and Tasks
-- Added request/response DTOs, validation, and clean entity-to-DTO mapping
-- Implemented pagination and sorting for task retrieval
-- Added dynamic task filtering by status, project, and title using Spring Data JPA Specifications
-- Refactored from derived query methods to `JpaSpecificationExecutor` for scalable filtering logic
-- Integrated AWS CloudWatch Logs for centralized logging of S3 operations (upload, delete, presigned URL generation)
-- Implemented structured logging for success and failure scenarios to improve observability and debugging
-- Configured IAM permissions for least-privilege access to S3 and CloudWatch Logs
+- Implemented CRUD operations for Projects, Tasks, Users, and Task Attachments
+- Added DTO-based request/response design, validation, and clean entity-to-DTO mapping
+- Implemented pagination, sorting, and dynamic filtering using Spring Data JPA Specifications
+- Integrated AWS S3 for secure file storage with pre-signed URL generation
+- Configured IAM least-privilege access for S3, Lambda, and CloudWatch services
+- Implemented centralized CloudWatch logging and structured JSON logs for observability
+- Built an asynchronous event-driven pipeline using S3 → Lambda → CloudWatch
+- Added serverless metadata processing and validation for uploaded files using AWS Lambda
 ```
 
 ## Overview
@@ -32,7 +32,7 @@ This project demonstrates backend engineering best practices including:
 - Spring Boot
 - Spring Data JPA
 - PostgreSQL
-- AWS S3 (S3, CloudWatch)
+- AWS (S3, Lambda, CloudWatch, IAM)
 - Maven
 - Lombok
 - Jakarta Validation
@@ -157,7 +157,29 @@ This allows developers and recruiters to quickly understand and interact with th
 - Files are stored in a private AWS S3 bucket
 - File metadata is stored in PostgreSQL
 - Pre-signed URLs are generated for secure, temporary file access
-- Application logs are sent to AWS CloudWatch for monitoring and debugging
+- S3 upload events asynchronously trigger AWS Lambda functions
+- Lambda processes file event metadata and sends structured logs to CloudWatch
+- Environment variables are used for configurable serverless validation rules
+
+## Serverless Event Processing
+
+The application includes an event-driven serverless workflow using AWS Lambda.
+
+Workflow:
+
+1. User uploads a file through the Spring Boot API
+2. File is stored in a private S3 bucket
+3. S3 triggers an AWS Lambda function asynchronously
+4. Lambda extracts file event metadata
+5. Structured JSON logs are sent to CloudWatch
+
+The Lambda function currently performs:
+
+- Bucket/object metadata extraction
+- File size validation
+- Structured JSON logging
+- Environment-based runtime configuration
+- Event-driven asynchronous processing
 
 ## Task Filtering, Search, Pagination, and Sorting
 
@@ -203,7 +225,6 @@ This project is actively being extended to simulate a more production-ready syst
 - Role-based access control (Admin/User roles)
 - Unit and integration testing
 - Deployment to AWS (Docker + EC2/ECS) with Dockerized application
-- Environment configuration and secrets management for production readiness
 
 ## Notes
 
