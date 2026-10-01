@@ -1,6 +1,7 @@
 package com.enock.taskmanagementapispringboot.services;
 
 import com.enock.taskmanagementapispringboot.dtos.S3DTO.S3FileResponse;
+import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.TaskAttachmentResponse;
 import com.enock.taskmanagementapispringboot.entities.Task;
 import com.enock.taskmanagementapispringboot.entities.TaskAttachment;
@@ -26,19 +27,21 @@ public class TaskAttachmentService {
     private final TaskAttachmentMapper taskAttachmentMapper;
     private final S3Service s3Service;
     private final CloudWatchService cloudWatchService;
+    private final SqsService sqsService;
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskAttachmentService.class);
 
     public TaskAttachmentService(TaskAttachmentRepository taskAttachmentRepository,
                                  TaskRepository taskRepository,
                                  TaskAttachmentMapper taskAttachmentMapper,
                                  S3Service s3Service1,
-                                 CloudWatchService cloudWatchService
+                                 CloudWatchService cloudWatchService, SqsService sqsService
     ) {
         this.taskAttachmentRepository = taskAttachmentRepository;
         this.taskRepository = taskRepository;
         this.taskAttachmentMapper = taskAttachmentMapper;
         this.s3Service = s3Service1;
         this.cloudWatchService = cloudWatchService;
+        this.sqsService = sqsService;
     }
 
     public List<TaskAttachmentResponse> findByTaskId(Long taskId) {
@@ -60,7 +63,8 @@ public class TaskAttachmentService {
                 file.getOriginalFilename(),
                 file.getSize(),
                 file.getContentType(),
-                "started");
+                "started"
+        );
 
         cloudWatchService.sendLogToCloudWatch(
                 String.format("event=%s taskId=%d fileName=%s fileSize=%d contentType=%s status=%s",
@@ -85,7 +89,8 @@ public class TaskAttachmentService {
                     file.getSize(),
                     file.getContentType(),
                     "failed",
-                    e.getMessage());
+                    e.getMessage()
+            );
 
             cloudWatchService.sendLogToCloudWatch(
                     String.format("event=%s taskId=%d fileName=%s fileSize=%d contentType=%s status=%s errorMessage=%s",
@@ -95,7 +100,8 @@ public class TaskAttachmentService {
                             file.getSize(),
                             file.getContentType(),
                             "failed",
-                            e.getMessage())
+                            e.getMessage()
+                    )
             );
             throw e;
         }
@@ -119,7 +125,8 @@ public class TaskAttachmentService {
                 file.getSize(),
                 file.getContentType(),
                 "success",
-                s3FileResponse.getObjectKey());
+                s3FileResponse.getObjectKey()
+        );
 
         cloudWatchService.sendLogToCloudWatch(
                 String.format("event=%s taskId=%d attachmentId=%d fileName=%s fileSize=%d contentType=%s status=%s objectKey=%s",
@@ -130,12 +137,23 @@ public class TaskAttachmentService {
                         file.getSize(),
                         file.getContentType(),
                         "success",
-                        s3FileResponse.getObjectKey())
+                        s3FileResponse.getObjectKey()
+                )
         );
 
         cloudWatchService.sendMetricToCloudWatch(
                 "S3UploadedBytes", (double) file.getSize(), StandardUnit.BYTES
         );
+
+        AttachmentUploadedEvent attachmentUploadedEvent = new AttachmentUploadedEvent(
+                savedTaskAttachment.getId(),
+                "ATTACHMENT_UPLOADED",
+                s3FileResponse.getObjectKey(),
+                file.getOriginalFilename(),
+                taskId
+        );
+
+        sqsService.sendAttachmentUploadedEvent(attachmentUploadedEvent);
 
         return taskAttachmentMapper.mapTaskAttachmentToTaskAttachmentResponse(savedTaskAttachment);
     }
