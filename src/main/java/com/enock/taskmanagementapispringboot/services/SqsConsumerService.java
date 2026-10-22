@@ -1,6 +1,7 @@
 package com.enock.taskmanagementapispringboot.services;
 
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -12,16 +13,17 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class SqsConsumerService {
-    @Value("${aws.sqs.url}")
-    private String queueUrl;
 
+    private final String queueUrl;
     private final SqsClient sqsClient;
     private final JsonMapper jsonMapper;
 
 
-    public SqsConsumerService(SqsClient sqsClient, JsonMapper jsonMapper) {
+    public SqsConsumerService(@Value("${aws.sqs.url}")String queueUrl, SqsClient sqsClient, JsonMapper jsonMapper) {
+        this.queueUrl = queueUrl;
         this.sqsClient = sqsClient;
         this.jsonMapper = jsonMapper;
     }
@@ -38,13 +40,14 @@ public class SqsConsumerService {
         List<Message> messages = response.messages();
 
         for (Message message : messages){
-            System.out.println("Message ID: " + message.messageId());
-            System.out.println("Message Body: " + message.body());
+            log.info("Message ID: {}", message.messageId());
+            log.info("Message Body: {}", message.body());
+
             try {
                 AttachmentUploadedEvent event = jsonMapper.readValue(message.body(), AttachmentUploadedEvent.class);
-                System.out.println("TaskId: " + event.getTaskId());
-                System.out.println("AttachmentId: " + event.getAttachmentId());
-                System.out.println("EventType: " + event.getEventType());
+                log.info("TaskId: {}", event.getTaskId());
+                log.info("AttachmentId: {}", event.getAttachmentId());
+                log.info("EventType: {}", event.getEventType());
 
                 DeleteMessageRequest deleteMessageRequest = DeleteMessageRequest.builder()
                         .queueUrl(queueUrl)
@@ -54,7 +57,7 @@ public class SqsConsumerService {
                 sqsClient.deleteMessage(deleteMessageRequest);
 
             } catch (Exception ex){
-                System.err.println("An error occurred: " + ex.getMessage());
+                log.error("Failed to process SQS message ID: {}. Reason: {}", message.messageId(), ex.getMessage(), ex);
             }
         }
 
