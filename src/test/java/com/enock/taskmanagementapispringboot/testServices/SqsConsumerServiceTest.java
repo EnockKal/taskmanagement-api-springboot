@@ -2,6 +2,7 @@ package com.enock.taskmanagementapispringboot.testServices;
 
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
 import com.enock.taskmanagementapispringboot.services.SqsConsumerService;
+import com.fasterxml.jackson.core.JsonParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.core.exc.StreamReadException;
 
 import static org.mockito.Mockito.*;
 
@@ -60,5 +62,26 @@ public class SqsConsumerServiceTest {
         sqsConsumerService.pollMessages();
 
         verify(sqsClient, times(1)).deleteMessage(any(DeleteMessageRequest.class));
+    }
+
+    @Test
+    void shouldNotDeleteMessageWhenProcessingFails() throws Exception {
+        Message message = Message.builder()
+                .messageId("msg-123")
+                .receiptHandle("receip-123")
+                .body("THIS_IS_NOT_VALID_JSON")
+                .build();
+
+        ReceiveMessageResponse response = ReceiveMessageResponse.builder()
+                .messages(message)
+                .build();
+
+        when(sqsClient.receiveMessage(any(ReceiveMessageRequest.class))).thenReturn(response);
+        when(jsonMapper.readValue(message.body(), AttachmentUploadedEvent.class))
+                .thenThrow(new IllegalArgumentException("Invalid JSON"));
+
+        sqsConsumerService.pollMessages();
+
+        verify(sqsClient, never()).deleteMessage(any(DeleteMessageRequest.class));
     }
 }
