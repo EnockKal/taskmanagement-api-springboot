@@ -29,10 +29,9 @@ public class SqsConsumerServiceTest {
     @InjectMocks
     private SqsConsumerService sqsConsumerService;
 
-    private final String queueUrl = "https://sqs.us-east-2.amazonaws.com/123456789012/test-queue";
-
     @BeforeEach
     void setUp(){
+        String queueUrl = "https://sqs.us-east-2.amazonaws.com/123456789012/test-queue";
         sqsConsumerService = new SqsConsumerService(queueUrl, sqsClient, jsonMapper);
     }
 
