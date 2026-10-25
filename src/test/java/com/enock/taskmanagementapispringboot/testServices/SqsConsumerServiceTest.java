@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,8 +16,10 @@ import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.core.exc.StreamReadException;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,5 +86,67 @@ public class SqsConsumerServiceTest {
         sqsConsumerService.pollMessages();
 
         verify(sqsClient, never()).deleteMessage(any(DeleteMessageRequest.class));
+    }
+
+    @Test
+    void shouldContinueProcessingAfterOneMessageFails() throws Exception {
+        Message message1 = Message.builder()
+                .messageId("msg-101")
+                .receiptHandle("recipe-101")
+                .body("{\"taskId\":6,\"attachmentId\":27,\"eventType\":\"ATTACHMENT_UPLOADED\"}")
+                .build();
+
+        Message message2 = Message.builder()
+                .messageId("msg-102")
+                .receiptHandle("recipe-102")
+                .body("THIS_IS_NOT_VALID_JSON")
+                .build();
+
+        Message message3 = Message.builder()
+                .messageId("msg-103")
+                .receiptHandle("recipe-103")
+                .body("{\"taskId\":6,\"attachmentId\":28,\"eventType\":\"ATTACHMENT_UPLOADED\"}")
+                .build();
+
+        ReceiveMessageResponse response = ReceiveMessageResponse.builder()
+                .messages(message1, message2, message3)
+                .build();
+
+        AttachmentUploadedEvent event1 = new AttachmentUploadedEvent(
+                27L,
+                "ATTACHMENT_UPLOADED",
+                "test-file.png",
+                "test-file.png",
+                6L
+        );
+        AttachmentUploadedEvent event3 = new AttachmentUploadedEvent(
+                28L,
+                "ATTACHMENT_UPLOADED",
+                "test-file.png",
+                "test-file.png",
+                6L
+        );
+
+        when(sqsClient.receiveMessage(any(ReceiveMessageRequest.class))).thenReturn(response);
+        when(jsonMapper.readValue(message1.body(), AttachmentUploadedEvent.class)).thenReturn(event1);
+        when(jsonMapper.readValue(message2.body(), AttachmentUploadedEvent.class)).thenThrow(
+                new IllegalArgumentException("Invalid JSON"));
+        when(jsonMapper.readValue(message3.body(), AttachmentUploadedEvent.class)).thenReturn(event3);
+
+        sqsConsumerService.pollMessages();
+
+        ArgumentCaptor<DeleteMessageRequest> captor = ArgumentCaptor.forClass(DeleteMessageRequest.class);
+
+        verify(sqsClient, times(2)).deleteMessage(captor.capture());
+
+        List<DeleteMessageRequest> deleteMessageRequestList = captor.getAllValues();
+
+        List<String> deletedReceipts = deleteMessageRequestList.stream()
+                .map(DeleteMessageRequest::receiptHandle)
+                .toList();
+
+        assertTrue(deletedReceipts.contains("recipe-101"));
+        assertTrue(deletedReceipts.contains("recipe-103"));
+        assertFalse(deletedReceipts.contains("recipe-102"));
     }
 }
