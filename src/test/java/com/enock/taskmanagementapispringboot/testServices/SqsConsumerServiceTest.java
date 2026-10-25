@@ -149,4 +149,17 @@ public class SqsConsumerServiceTest {
         assertTrue(deletedReceipts.contains("recipe-103"));
         assertFalse(deletedReceipts.contains("recipe-102"));
     }
+
+    @Test
+    void shouldNotDeleteWhenQueueIsEmpty() {
+        ReceiveMessageResponse response = ReceiveMessageResponse.builder()
+                .messages(List.of())
+                .build();
+
+        when(sqsClient.receiveMessage(any(ReceiveMessageRequest.class))).thenReturn(response);
+
+        sqsConsumerService.pollMessages();
+
+        verify(sqsClient, never()).deleteMessage(any(DeleteMessageRequest.class));
+    }
 }
