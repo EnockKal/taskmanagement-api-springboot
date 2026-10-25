@@ -2,7 +2,6 @@ package com.enock.taskmanagementapispringboot.testServices;
 
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
 import com.enock.taskmanagementapispringboot.services.SqsConsumerService;
-import com.fasterxml.jackson.core.JsonParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
-import software.amazon.awssdk.services.sqs.model.Message;
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
+import software.amazon.awssdk.services.sqs.model.*;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
@@ -164,5 +160,18 @@ public class SqsConsumerServiceTest {
         verifyNoInteractions(jsonMapper);
         // or
         // verify(jsonMapper, never()).readValue(any(String.class), eq(AttachmentUploadedEvent.class));
+    }
+
+    @Test
+    void shouldPropagateExceptionWhenSqsReceiveFails() {
+        SqsException sqsException = (SqsException) SqsException.builder()
+                        .message("SQS unavailable")
+                                        .build();
+        when(sqsClient.receiveMessage(any(ReceiveMessageRequest.class))).thenThrow(sqsException);
+
+        SqsException exception = assertThrows(SqsException.class, () -> sqsConsumerService.pollMessages());
+
+        assertEquals("SQS unavailable", exception.getMessage());
+        verify(sqsClient, never()).deleteMessage(any(DeleteMessageRequest.class));
     }
 }
