@@ -161,5 +161,8 @@ public class SqsConsumerServiceTest {
         sqsConsumerService.pollMessages();
 
         verify(sqsClient, never()).deleteMessage(any(DeleteMessageRequest.class));
+        verifyNoInteractions(jsonMapper);
+        // or
+        // verify(jsonMapper, never()).readValue(any(String.class), eq(AttachmentUploadedEvent.class));
     }
 }
