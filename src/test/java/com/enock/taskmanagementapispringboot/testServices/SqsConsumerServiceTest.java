@@ -53,7 +53,8 @@ public class SqsConsumerServiceTest {
                 "ATTACHMENT_UPLOADED",
                 "test-file.png",
                 "test-file.png",
-                6L);
+                6L,
+                "evt-test-123");
 
         when(sqsClient.receiveMessage(any(ReceiveMessageRequest.class))).thenReturn(response);
         when(jsonMapper.readValue(message.body(), AttachmentUploadedEvent.class)).thenReturn(event);
@@ -113,14 +114,16 @@ public class SqsConsumerServiceTest {
                 "ATTACHMENT_UPLOADED",
                 "test-file.png",
                 "test-file.png",
-                6L
+                6L,
+                "evt-test-123"
         );
         AttachmentUploadedEvent event3 = new AttachmentUploadedEvent(
                 28L,
                 "ATTACHMENT_UPLOADED",
                 "test-file.png",
                 "test-file.png",
-                6L
+                6L,
+                "evt-test-123"
         );
 
         when(sqsClient.receiveMessage(any(ReceiveMessageRequest.class))).thenReturn(response);

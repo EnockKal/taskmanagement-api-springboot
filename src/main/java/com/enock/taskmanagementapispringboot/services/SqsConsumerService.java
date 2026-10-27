@@ -46,6 +46,7 @@ public class SqsConsumerService {
             try {
                 AttachmentUploadedEvent event = jsonMapper.readValue(message.body(), AttachmentUploadedEvent.class);
                 log.info("TaskId: {}", event.getTaskId());
+                log.info("EventId: {}", event.getEventId());
                 log.info("AttachmentId: {}", event.getAttachmentId());
                 log.info("EventType: {}", event.getEventType());
 

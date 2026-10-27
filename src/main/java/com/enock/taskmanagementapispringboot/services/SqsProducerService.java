@@ -11,7 +11,7 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SqsException;
 
 @Service
-public class SqsService {
+public class SqsProducerService {
     @Value("${aws.sqs.url}")
     private String queueUrl;
 
@@ -19,7 +19,7 @@ public class SqsService {
     private final SqsClient sqsClient;
     private final CloudWatchService cloudWatchService;
 
-    public SqsService(JsonMapper jsonMapper, SqsClient sqsClient, CloudWatchService cloudWatchService) {
+    public SqsProducerService(JsonMapper jsonMapper, SqsClient sqsClient, CloudWatchService cloudWatchService) {
         this.jsonMapper = jsonMapper;
         this.sqsClient = sqsClient;
         this.cloudWatchService = cloudWatchService;
@@ -37,9 +37,10 @@ public class SqsService {
             sqsClient.sendMessage(sendMessageRequest);
 
             cloudWatchService.sendLogToCloudWatch(
-                    String.format("event=%s taskId=%d attachmentId=%d eventType=%s status=%s",
+                    String.format("event=%s taskId=%d eventId=%s attachmentId=%d eventType=%s status=%s",
                             "sqs_message_sent",
                             event.getTaskId(),
+                            event.getEventId(),
                             event.getAttachmentId(),
                             event.getEventType(),
                             "success")
@@ -51,9 +52,10 @@ public class SqsService {
 
         } catch (SqsException e){
             cloudWatchService.sendLogToCloudWatch(
-                    String.format("event=%s taskId=%d attachmentId=%d eventType=%s status=%s errorMessage=%s",
+                    String.format("event=%s taskId=%d eventId=%s attachmentId=%d eventType=%s status=%s errorMessage=%s",
                             "sqs_message_failed",
                             event.getTaskId(),
+                            event.getEventId(),
                             event.getAttachmentId(),
                             event.getEventType(),
                             "failed",
@@ -67,9 +69,10 @@ public class SqsService {
 
         } catch (Exception e) {
             cloudWatchService.sendLogToCloudWatch(
-                    String.format("event=%s taskId=%d attachmentId=%d eventType=%s status=%s errorMessage=%s",
+                    String.format("event=%s taskId=%d eventId=%s attachmentId=%d eventType=%s status=%s errorMessage=%s",
                             "sqs_event_processing_failed",
                             event.getTaskId(),
+                            event.getEventId(),
                             event.getAttachmentId(),
                             event.getEventType(),
                             "failed",

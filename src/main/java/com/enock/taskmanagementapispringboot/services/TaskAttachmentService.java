@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class TaskAttachmentService {
@@ -27,21 +28,21 @@ public class TaskAttachmentService {
     private final TaskAttachmentMapper taskAttachmentMapper;
     private final S3Service s3Service;
     private final CloudWatchService cloudWatchService;
-    private final SqsService sqsService;
+    private final SqsProducerService sqsProducerService;
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskAttachmentService.class);
 
     public TaskAttachmentService(TaskAttachmentRepository taskAttachmentRepository,
                                  TaskRepository taskRepository,
                                  TaskAttachmentMapper taskAttachmentMapper,
                                  S3Service s3Service1,
-                                 CloudWatchService cloudWatchService, SqsService sqsService
+                                 CloudWatchService cloudWatchService, SqsProducerService sqsProducerService
     ) {
         this.taskAttachmentRepository = taskAttachmentRepository;
         this.taskRepository = taskRepository;
         this.taskAttachmentMapper = taskAttachmentMapper;
         this.s3Service = s3Service1;
         this.cloudWatchService = cloudWatchService;
-        this.sqsService = sqsService;
+        this.sqsProducerService = sqsProducerService;
     }
 
     public List<TaskAttachmentResponse> findByTaskId(Long taskId) {
@@ -150,10 +151,11 @@ public class TaskAttachmentService {
                 "ATTACHMENT_UPLOADED",
                 s3FileResponse.getObjectKey(),
                 file.getOriginalFilename(),
-                taskId
+                taskId,
+                UUID.randomUUID().toString()
         );
 
-        sqsService.sendAttachmentUploadedEvent(attachmentUploadedEvent);
+        sqsProducerService.sendAttachmentUploadedEvent(attachmentUploadedEvent);
 
         return taskAttachmentMapper.mapTaskAttachmentToTaskAttachmentResponse(savedTaskAttachment);
     }

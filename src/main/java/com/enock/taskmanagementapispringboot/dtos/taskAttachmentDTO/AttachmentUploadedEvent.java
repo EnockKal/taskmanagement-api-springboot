@@ -14,4 +14,5 @@ public class AttachmentUploadedEvent {
     private String fileName;
 
     private Long taskId;
+    private String eventId;
 }
