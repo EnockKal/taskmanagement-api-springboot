@@ -5,6 +5,7 @@ import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUp
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.TaskAttachmentResponse;
 import com.enock.taskmanagementapispringboot.entities.Task;
 import com.enock.taskmanagementapispringboot.entities.TaskAttachment;
+import com.enock.taskmanagementapispringboot.enums.AttachmentProcessingStatus;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.mappers.TaskAttachmentMapper;
 import com.enock.taskmanagementapispringboot.repository.TaskAttachmentRepository;
@@ -110,10 +111,11 @@ public class TaskAttachmentService {
         TaskAttachment taskAttachment = new TaskAttachment();
 
         taskAttachment.setOriginalFileName(s3FileResponse.getOriginalFilename());
-        taskAttachment.setObjectKey(s3FileResponse.getObjectKey());
         taskAttachment.setFileSize(s3FileResponse.getFileSize());
+        taskAttachment.setObjectKey(s3FileResponse.getObjectKey());
         taskAttachment.setContentType(s3FileResponse.getContentType());
         taskAttachment.setUploadedAt(LocalDateTime.now());
+        taskAttachment.setProcessingStatus(AttachmentProcessingStatus.PENDING);
         taskAttachment.setTask(task);
 
         TaskAttachment savedTaskAttachment = taskAttachmentRepository.save(taskAttachment);

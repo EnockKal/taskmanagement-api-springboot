@@ -1,5 +1,6 @@
 package com.enock.taskmanagementapispringboot.entities;
 
+import com.enock.taskmanagementapispringboot.enums.AttachmentProcessingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,9 @@ public class TaskAttachment {
     private String objectKey;
     private String contentType;
     private LocalDateTime uploadedAt;
+
+    @Enumerated(EnumType.STRING)
+    private AttachmentProcessingStatus processingStatus;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
