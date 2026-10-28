@@ -3,6 +3,7 @@ package com.enock.taskmanagementapispringboot.services;
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
@@ -34,6 +35,7 @@ public class SqsConsumerService {
         this.attachmentEventProcessingService = attachmentEventProcessingService;
     }
 
+    @Scheduled(fixedDelay = 5000)
     public void pollMessages(){
         ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueUrl)

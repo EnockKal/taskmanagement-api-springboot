@@ -120,10 +120,11 @@ public class TaskAttachmentService {
 
         TaskAttachment savedTaskAttachment = taskAttachmentRepository.save(taskAttachment);
 
-        LOGGER.info("event={} taskId={} attachmentId={} fileName={} fileSize={} contentType={} status={} objectKey={}",
+        LOGGER.info("event={} taskId={} attachmentId={} processingStatus={} fileName={} fileSize={} contentType={} status={} objectKey={}",
                 "s3_upload_success",
                 taskId,
                 savedTaskAttachment.getId(),
+                savedTaskAttachment.getProcessingStatus(),
                 file.getOriginalFilename(),
                 file.getSize(),
                 file.getContentType(),
@@ -132,10 +133,11 @@ public class TaskAttachmentService {
         );
 
         cloudWatchService.sendLogToCloudWatch(
-                String.format("event=%s taskId=%d attachmentId=%d fileName=%s fileSize=%d contentType=%s status=%s objectKey=%s",
+                String.format("event=%s taskId=%d attachmentId=%d processingStatus=%s fileName=%s fileSize=%d contentType=%s status=%s objectKey=%s",
                         "s3_upload_success",
                         taskId,
                         savedTaskAttachment.getId(),
+                        savedTaskAttachment.getProcessingStatus(),
                         file.getOriginalFilename(),
                         file.getSize(),
                         file.getContentType(),

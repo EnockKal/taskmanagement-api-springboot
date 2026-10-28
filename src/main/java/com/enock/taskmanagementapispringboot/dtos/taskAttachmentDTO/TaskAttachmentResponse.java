@@ -1,5 +1,6 @@
 package com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO;
 
+import com.enock.taskmanagementapispringboot.enums.AttachmentProcessingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 public class TaskAttachmentResponse {
     private Long Id;
     private String originalFileName;
+    private AttachmentProcessingStatus processingStatus;
     private Long fileSize;
     private String objectKey;
     private String contentType;

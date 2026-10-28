@@ -20,6 +20,7 @@ public class TaskAttachmentMapper {
         taskAttachmentResponse.setObjectKey(taskAttachment.getObjectKey());
         taskAttachmentResponse.setContentType(taskAttachment.getContentType());
         taskAttachmentResponse.setUploadedAt(taskAttachment.getUploadedAt());
+        taskAttachmentResponse.setProcessingStatus(taskAttachment.getProcessingStatus());
 
         return taskAttachmentResponse;
     }
