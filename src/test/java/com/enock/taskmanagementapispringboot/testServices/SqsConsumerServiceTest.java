@@ -1,12 +1,12 @@
 package com.enock.taskmanagementapispringboot.testServices;
 
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
+import com.enock.taskmanagementapispringboot.services.AttachmentEventProcessingService;
 import com.enock.taskmanagementapispringboot.services.SqsConsumerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -27,13 +27,15 @@ public class SqsConsumerServiceTest {
     @Mock
     private JsonMapper jsonMapper;
 
-    @InjectMocks
+    @Mock
+    private AttachmentEventProcessingService attachmentEventProcessingService;
+
     private SqsConsumerService sqsConsumerService;
 
     @BeforeEach
     void setUp(){
         String queueUrl = "https://sqs.us-east-2.amazonaws.com/123456789012/test-queue";
-        sqsConsumerService = new SqsConsumerService(queueUrl, sqsClient, jsonMapper);
+        sqsConsumerService = new SqsConsumerService(queueUrl, sqsClient, jsonMapper, attachmentEventProcessingService);
     }
 
     @Test
@@ -68,7 +70,7 @@ public class SqsConsumerServiceTest {
     void shouldNotDeleteMessageWhenProcessingFails() throws Exception {
         Message message = Message.builder()
                 .messageId("msg-123")
-                .receiptHandle("receip-123")
+                .receiptHandle("recipe-123")
                 .body("THIS_IS_NOT_VALID_JSON")
                 .build();
 
@@ -76,12 +78,23 @@ public class SqsConsumerServiceTest {
                 .messages(message)
                 .build();
 
+        AttachmentUploadedEvent event = new AttachmentUploadedEvent(
+                27L,
+                "ATTACHMENT_UPLOADED",
+                "test-file.png",
+                "test-file.png",
+                6L,
+                "evt-123"
+        );
+
         when(sqsClient.receiveMessage(any(ReceiveMessageRequest.class))).thenReturn(response);
-        when(jsonMapper.readValue(message.body(), AttachmentUploadedEvent.class))
-                .thenThrow(new IllegalArgumentException("Invalid JSON"));
+        when(jsonMapper.readValue(message.body(), AttachmentUploadedEvent.class)).thenReturn(event);
+
+        doThrow(new RuntimeException("Database failure")).when(attachmentEventProcessingService).processEvent(event);
 
         sqsConsumerService.pollMessages();
 
+        verify(attachmentEventProcessingService, times(1)).processEvent(event);
         verify(sqsClient, never()).deleteMessage(any(DeleteMessageRequest.class));
     }
 

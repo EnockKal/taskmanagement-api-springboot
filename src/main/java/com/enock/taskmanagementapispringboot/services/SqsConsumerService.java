@@ -20,12 +20,18 @@ public class SqsConsumerService {
     private final String queueUrl;
     private final SqsClient sqsClient;
     private final JsonMapper jsonMapper;
+    private final AttachmentEventProcessingService attachmentEventProcessingService;
 
 
-    public SqsConsumerService(@Value("${aws.sqs.url}")String queueUrl, SqsClient sqsClient, JsonMapper jsonMapper) {
+    public SqsConsumerService(
+            @Value("${aws.sqs.url}")String queueUrl,
+            SqsClient sqsClient,
+            JsonMapper jsonMapper,
+            AttachmentEventProcessingService attachmentEventProcessingService) {
         this.queueUrl = queueUrl;
         this.sqsClient = sqsClient;
         this.jsonMapper = jsonMapper;
+        this.attachmentEventProcessingService = attachmentEventProcessingService;
     }
 
     public void pollMessages(){
@@ -45,6 +51,9 @@ public class SqsConsumerService {
 
             try {
                 AttachmentUploadedEvent event = jsonMapper.readValue(message.body(), AttachmentUploadedEvent.class);
+
+                attachmentEventProcessingService.processEvent(event);
+
                 log.info("TaskId: {}", event.getTaskId());
                 log.info("EventId: {}", event.getEventId());
                 log.info("AttachmentId: {}", event.getAttachmentId());
