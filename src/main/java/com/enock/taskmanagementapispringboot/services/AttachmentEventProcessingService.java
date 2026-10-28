@@ -7,9 +7,11 @@ import com.enock.taskmanagementapispringboot.enums.AttachmentProcessingStatus;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.repository.ProcessedEventRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskAttachmentRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class AttachmentEventProcessingService {
     private final ProcessedEventRepository processedEventRepository;
@@ -29,6 +31,7 @@ public class AttachmentEventProcessingService {
             throw new IllegalArgumentException("Failed to process attachment: eventId cannot be null or empty.");
 
         if (processedEventRepository.existsById(eventId)){
+            log.info("Duplicate event skipped: eventId{}", eventId);
             return;
         }
 
