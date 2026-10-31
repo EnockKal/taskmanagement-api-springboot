@@ -26,10 +26,9 @@ public class S3Service {
 
     //private final CloudWatchService cloudWatchService;
 
-    public S3Service(S3Client s3Client, S3Presigner s3Presigner, CloudWatchService cloudWatchService) {
+    public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
-        //this.cloudWatchService = cloudWatchService;
     }
 
     public S3FileResponse uploadFile(MultipartFile file) throws IOException {
