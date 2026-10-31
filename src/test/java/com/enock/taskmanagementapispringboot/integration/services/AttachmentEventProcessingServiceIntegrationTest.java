@@ -1,12 +1,14 @@
 package com.enock.taskmanagementapispringboot.integration.services;
 
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
+import com.enock.taskmanagementapispringboot.entities.ProcessedEvent;
 import com.enock.taskmanagementapispringboot.entities.TaskAttachment;
 import com.enock.taskmanagementapispringboot.enums.AttachmentProcessingStatus;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.repository.ProcessedEventRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskAttachmentRepository;
 import com.enock.taskmanagementapispringboot.services.AttachmentEventProcessingService;
+import com.enock.taskmanagementapispringboot.services.S3Service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,12 +19,16 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class AttachmentEventProcessingServiceIntegrationTest {
     @MockitoBean
     private SqsClient sqsClient;
+
+    @MockitoBean
+    private S3Service s3Service;
 
     @Autowired
     private AttachmentEventProcessingService attachmentEventProcessingService;
@@ -52,9 +58,10 @@ public class AttachmentEventProcessingServiceIntegrationTest {
         attachmentEventProcessingService.processEvent(event);
 
         TaskAttachment updatedAttachment = taskAttachmentRepository.findById(savedAttachment.getId()).orElseThrow(() ->
-                new ResourceNotFoundException("Not found"));
+                new ResourceNotFoundException("Attachment: " + savedAttachment.getId() + " Not found"));
 
         assertEquals(AttachmentProcessingStatus.PROCESSED, updatedAttachment.getProcessingStatus());
+        assertTrue(processedEventRepository.existsById(event.getEventId()));
     }
 
 }
