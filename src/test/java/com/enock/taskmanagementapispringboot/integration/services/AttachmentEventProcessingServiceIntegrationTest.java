@@ -18,8 +18,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -65,6 +64,32 @@ public class AttachmentEventProcessingServiceIntegrationTest {
 
         assertEquals(AttachmentProcessingStatus.PROCESSED, updatedAttachment.getProcessingStatus());
         assertTrue(processedEventRepository.existsById(event.getEventId()));
+    }
+
+    @Test
+    void shouldRollbackWhenEventProcessingFails(){
+        TaskAttachment attachment = new TaskAttachment();
+        attachment.setProcessingStatus(AttachmentProcessingStatus.PENDING);
+
+        TaskAttachment savedAttachment = taskAttachmentRepository.save(attachment);
+
+        AttachmentUploadedEvent event = new AttachmentUploadedEvent(
+                savedAttachment.getId(),
+                "ATTACHMENT_UPLOADED",
+                "test-file.png",
+                "test-file.png",
+                6L,
+                "a".repeat(300)
+        );
+
+        assertThrows(RuntimeException.class, () ->
+                attachmentEventProcessingService.processEvent(event));
+
+        TaskAttachment updatedAttachment = taskAttachmentRepository.findById(savedAttachment.getId()).orElseThrow(()->
+                 new ResourceNotFoundException("Not found"));
+
+         assertEquals(AttachmentProcessingStatus.PENDING, updatedAttachment.getProcessingStatus());
+         assertFalse(processedEventRepository.existsById(event.getEventId()));
     }
 
 }
