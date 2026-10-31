@@ -1,13 +1,13 @@
 package com.enock.taskmanagementapispringboot.integration.services;
 
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
-import com.enock.taskmanagementapispringboot.entities.ProcessedEvent;
 import com.enock.taskmanagementapispringboot.entities.TaskAttachment;
 import com.enock.taskmanagementapispringboot.enums.AttachmentProcessingStatus;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.repository.ProcessedEventRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskAttachmentRepository;
 import com.enock.taskmanagementapispringboot.services.AttachmentEventProcessingService;
+import com.enock.taskmanagementapispringboot.services.CloudWatchService;
 import com.enock.taskmanagementapispringboot.services.S3Service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +29,9 @@ public class AttachmentEventProcessingServiceIntegrationTest {
 
     @MockitoBean
     private S3Service s3Service;
+
+    @MockitoBean
+    private CloudWatchService cloudWatchService;
 
     @Autowired
     private AttachmentEventProcessingService attachmentEventProcessingService;
