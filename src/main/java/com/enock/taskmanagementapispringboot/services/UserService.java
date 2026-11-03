@@ -10,21 +10,17 @@ import com.enock.taskmanagementapispringboot.exceptions.UserAlreadyExistsExcepti
 import com.enock.taskmanagementapispringboot.mappers.UserMapper;
 import com.enock.taskmanagementapispringboot.repository.TaskRepository;
 import com.enock.taskmanagementapispringboot.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final TaskRepository taskRepository;
-
-    public UserService(UserRepository userRepository, UserMapper userMapper, TaskRepository taskRepository) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.taskRepository = taskRepository;
-    }
 
     public UserResponse createUser(UserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
