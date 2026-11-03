@@ -7,22 +7,17 @@ import com.enock.taskmanagementapispringboot.enums.AttachmentProcessingStatus;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.repository.ProcessedEventRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskAttachmentRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AttachmentEventProcessingService {
     private final ProcessedEventRepository processedEventRepository;
     private final TaskAttachmentRepository taskAttachmentRepository;
-
-    public AttachmentEventProcessingService(
-            ProcessedEventRepository processedEventRepository,
-            TaskAttachmentRepository taskAttachmentRepository){
-        this.processedEventRepository = processedEventRepository;
-        this.taskAttachmentRepository = taskAttachmentRepository;
-    }
 
     @Transactional
     public void processEvent(AttachmentUploadedEvent event) {

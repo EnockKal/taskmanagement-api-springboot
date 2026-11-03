@@ -10,6 +10,7 @@ import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundExceptio
 import com.enock.taskmanagementapispringboot.mappers.TaskAttachmentMapper;
 import com.enock.taskmanagementapispringboot.repository.TaskAttachmentRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class TaskAttachmentService {
     private final TaskAttachmentRepository taskAttachmentRepository;
     private final TaskRepository taskRepository;
@@ -31,20 +33,6 @@ public class TaskAttachmentService {
     private final CloudWatchService cloudWatchService;
     private final SqsProducerService sqsProducerService;
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskAttachmentService.class);
-
-    public TaskAttachmentService(TaskAttachmentRepository taskAttachmentRepository,
-                                 TaskRepository taskRepository,
-                                 TaskAttachmentMapper taskAttachmentMapper,
-                                 S3Service s3Service1,
-                                 CloudWatchService cloudWatchService, SqsProducerService sqsProducerService
-    ) {
-        this.taskAttachmentRepository = taskAttachmentRepository;
-        this.taskRepository = taskRepository;
-        this.taskAttachmentMapper = taskAttachmentMapper;
-        this.s3Service = s3Service1;
-        this.cloudWatchService = cloudWatchService;
-        this.sqsProducerService = sqsProducerService;
-    }
 
     public List<TaskAttachmentResponse> findByTaskId(Long taskId) {
         taskRepository.findById(taskId).orElseThrow(() ->

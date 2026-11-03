@@ -11,6 +11,7 @@ import com.enock.taskmanagementapispringboot.mappers.TaskMapper;
 import com.enock.taskmanagementapispringboot.repository.ProjectRepository;
 import com.enock.taskmanagementapispringboot.repository.TaskRepository;
 import com.enock.taskmanagementapispringboot.specification.TaskSpecifications;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.PredicateSpecification;
@@ -20,18 +21,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
 
     private final ProjectRepository projectRepository;
 
     private  final TaskMapper taskMapper;
-
-    public TaskService(TaskRepository taskRepository, ProjectRepository projectRepository, TaskMapper taskMapper) {
-        this.taskRepository = taskRepository;
-        this.projectRepository = projectRepository;
-        this.taskMapper = taskMapper;
-    }
 
     public TaskResponse createTask(TaskRequest taskRequest) {
         Task task = taskMapper.mapToTask(taskRequest);

@@ -7,19 +7,16 @@ import com.enock.taskmanagementapispringboot.entities.Project;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
 import com.enock.taskmanagementapispringboot.mappers.ProjectMapper;
 import com.enock.taskmanagementapispringboot.repository.ProjectRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
-
-    public ProjectService(ProjectRepository projectRepository, ProjectMapper projectMapper){
-        this.projectRepository = projectRepository;
-        this.projectMapper = projectMapper;
-    }
 
     public List<ProjectResponse> getProjects() {
         return projectMapper.mapToProjectResponseList(projectRepository.findAll());

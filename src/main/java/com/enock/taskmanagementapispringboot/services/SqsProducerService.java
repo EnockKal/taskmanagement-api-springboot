@@ -2,6 +2,7 @@ package com.enock.taskmanagementapispringboot.services;
 
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
 //import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import tools.jackson.databind.json.JsonMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SqsException;
 
 @Service
+@RequiredArgsConstructor
 public class SqsProducerService {
     @Value("${aws.sqs.url}")
     private String queueUrl;
@@ -18,12 +20,6 @@ public class SqsProducerService {
     private final JsonMapper jsonMapper;
     private final SqsClient sqsClient;
     private final CloudWatchService cloudWatchService;
-
-    public SqsProducerService(JsonMapper jsonMapper, SqsClient sqsClient, CloudWatchService cloudWatchService) {
-        this.jsonMapper = jsonMapper;
-        this.sqsClient = sqsClient;
-        this.cloudWatchService = cloudWatchService;
-    }
 
     public void sendAttachmentUploadedEvent(AttachmentUploadedEvent event){
         try{

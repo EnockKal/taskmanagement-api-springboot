@@ -2,6 +2,7 @@ package com.enock.taskmanagementapispringboot.services;
 
 import com.enock.taskmanagementapispringboot.dtos.S3DTO.S3FileResponse;
 import com.enock.taskmanagementapispringboot.exceptions.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class S3Service {
     private final S3Client s3Client;
 
@@ -25,11 +27,6 @@ public class S3Service {
     private String bucketName;
 
     //private final CloudWatchService cloudWatchService;
-
-    public S3Service(S3Client s3Client, S3Presigner s3Presigner) {
-        this.s3Client = s3Client;
-        this.s3Presigner = s3Presigner;
-    }
 
     public S3FileResponse uploadFile(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {

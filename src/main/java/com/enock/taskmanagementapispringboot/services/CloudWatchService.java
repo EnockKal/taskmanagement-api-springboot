@@ -1,5 +1,6 @@
 package com.enock.taskmanagementapispringboot.services;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
@@ -11,6 +12,7 @@ import software.amazon.awssdk.services.cloudwatchlogs.model.*;
 import java.util.Collections;
 
 @Service
+@RequiredArgsConstructor
 public class CloudWatchService {
     @Value("${aws.cloudwatch.log-group-name}")
     private String logGroupName;
@@ -20,11 +22,6 @@ public class CloudWatchService {
 
     private final CloudWatchLogsClient cloudWatchLogsClient;
     private final CloudWatchClient cloudWatchClient;
-
-    public CloudWatchService(CloudWatchLogsClient cloudWatchLogsClient, CloudWatchClient cloudWatchClient) {
-        this.cloudWatchLogsClient = cloudWatchLogsClient;
-        this.cloudWatchClient = cloudWatchClient;
-    }
 
     public void sendLogToCloudWatch(String message) {
         try {
