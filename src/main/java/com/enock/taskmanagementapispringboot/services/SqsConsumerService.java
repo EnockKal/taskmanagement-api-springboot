@@ -1,7 +1,6 @@
 package com.enock.taskmanagementapispringboot.services;
 
 import com.enock.taskmanagementapispringboot.dtos.taskAttachmentDTO.AttachmentUploadedEvent;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,13 +16,24 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class SqsConsumerService {
 
     private final String queueUrl;
     private final SqsClient sqsClient;
     private final JsonMapper jsonMapper;
     private final AttachmentEventProcessingService attachmentEventProcessingService;
+
+
+    public SqsConsumerService(
+            @Value("${aws.sqs.url}")String queueUrl,
+            SqsClient sqsClient,
+            JsonMapper jsonMapper,
+            AttachmentEventProcessingService attachmentEventProcessingService) {
+        this.queueUrl = queueUrl;
+        this.sqsClient = sqsClient;
+        this.jsonMapper = jsonMapper;
+        this.attachmentEventProcessingService = attachmentEventProcessingService;
+    }
 
     @Scheduled(fixedDelay = 5000)
     public void pollMessages(){
